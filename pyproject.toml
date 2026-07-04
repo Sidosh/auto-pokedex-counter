@@ -1,7 +1,7 @@
 [project]
-name = "my-desktop-app"
+name = "pokedex_counter"
 version = "0.1.0"
-description = "A PySide6 desktop application"
+description = "A Pokedex Counter for RB 151"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
@@ -17,7 +17,7 @@ dev = [
 ]
 
 [project.scripts]
-my-desktop-app = "pokedex_counter.app:run"
+pokedex_counter = "pokedex_counter.app:run"
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]
