@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QLayout, QSizePolicy, QStyle, QWidget
 
 
 class FlowLayout(QLayout):
-    def __init__(self, parent: QWidget | None = None, margin: int = 0, spacing: int = -1) -> None:
+    def __init__(self, parent: QWidget | None = None, margin: int = 0, spacing: int = 0) -> None:
         super().__init__(parent)
 
         if parent is not None:

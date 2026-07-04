@@ -20,17 +20,27 @@ IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp"}
 class ClickableLabel(QLabel):
     clicked = Signal(Path)
 
+    BASE_STYLE = "padding: 4px;"
+
     def __init__(self, path: Path, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._path = path
         self._selected = False
+        self.setStyleSheet(self.BASE_STYLE)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
+
         if event.button() == Qt.MouseButton.LeftButton:
             self._selected = not self._selected
-            self.setStyleSheet("background-color: black;" if self._selected else "")
+
+            if self._selected:
+                self.setStyleSheet(self.BASE_STYLE + "background-color: black;")
+            else:
+                self.setStyleSheet(self.BASE_STYLE)
+
             self.clicked.emit(self._path)
+
         super().mousePressEvent(event)
 
 
@@ -42,7 +52,7 @@ class SpriteStrip(QWidget):
         self._folder = Path(folder)
         self._sprite_size = sprite_size
 
-        self._layout = FlowLayout(self, margin=4, spacing=8)
+        self._layout = FlowLayout(self)
 
         self.reload()
 
