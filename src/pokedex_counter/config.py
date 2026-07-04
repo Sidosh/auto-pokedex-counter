@@ -11,10 +11,4 @@ RESOURCES_DIR = Path(__file__).resolve().parent / "resources"
 SPRITES_DIR = RESOURCES_DIR / "sprites"
 SPRITES_BG_DIR = RESOURCES_DIR / "sprites_background"
 
-ROIS = [
-    (349, 43, 100, 100),
-    (263, 57, 100, 100),
-    (179, 201, 283, 82)
-]
-
 THRESHOLD = 0.80 
