@@ -30,7 +30,8 @@ class DetectionService(QObject):
         best_score = 0
     
         for name, template in self.templates.items():
-            result = cv2.matchTemplate(roi_gray, template, cv2.TM_CCOEFF_NORMED)
+            template_resized = cv2.resize(template, (roi_gray.shape[1], roi_gray.shape[0]))
+            result = cv2.matchTemplate(roi_gray, template_resized, cv2.TM_CCOEFF_NORMED)
             _, max_val, _, _ = cv2.minMaxLoc(result)
             
             if max_val > best_score:
