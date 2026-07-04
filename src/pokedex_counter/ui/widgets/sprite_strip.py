@@ -20,7 +20,7 @@ IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp"}
 class SpriteStrip(QScrollArea):
     """A grid of images, found in `folder`, that wraps onto new rows on resize."""
 
-    def __init__(self, folder: Path, sprite_size: int = 96, parent: QWidget | None = None) -> None:
+    def __init__(self, folder: Path, sprite_size: int = 24, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._folder = Path(folder)
         self._sprite_size = sprite_size
