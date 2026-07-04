@@ -42,6 +42,6 @@ class DetectionService(QObject):
             now = time.time()
             print("DETECTED:", best_name, best_score)
 
-            if now - self.cooldowns.get(name, 0) > self.cooldown_time:
-                self.cooldowns[name] = now
-                self.detection.emit(name)
+            if now - self.cooldowns.get(best_name, 0) > self.cooldown_time:
+                self.cooldowns[best_name] = now
+                self.detection.emit(best_name)
