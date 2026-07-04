@@ -2,12 +2,12 @@
 window is resized."""
 
 from pathlib import Path
+import re
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QMouseEvent, QPixmap
 from PySide6.QtWidgets import (
     QLabel,
-    QScrollArea,
     QSizePolicy,
     QWidget,
 )
@@ -18,9 +18,6 @@ IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp"}
 
 
 class ClickableLabel(QLabel):
-    """A QLabel that emits `clicked` with its associated path when left-clicked,
-    and highlights itself with a black background while selected."""
-
     clicked = Signal(Path)
 
     def __init__(self, path: Path, parent: QWidget | None = None) -> None:
@@ -37,9 +34,7 @@ class ClickableLabel(QLabel):
         super().mousePressEvent(event)
 
 
-class SpriteStrip(QScrollArea):
-    """A grid of images, found in `folder`, that wraps onto new rows on resize."""
-
+class SpriteStrip(QWidget):
     sprite_clicked = Signal(Path)
 
     def __init__(self, folder: Path, sprite_size: int = 24, parent: QWidget | None = None) -> None:
@@ -47,18 +42,11 @@ class SpriteStrip(QScrollArea):
         self._folder = Path(folder)
         self._sprite_size = sprite_size
 
-        self.setWidgetResizable(True)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-
-        self._container = QWidget()
-        self._layout = FlowLayout(self._container, margin=4, spacing=8)
-        self.setWidget(self._container)
+        self._layout = FlowLayout(self, margin=4, spacing=8)
 
         self.reload()
 
     def reload(self) -> None:
-        """Re-scan the folder and refresh the displayed sprites."""
         while self._layout.count():
             item = self._layout.takeAt(0)
             widget = item.widget()
@@ -76,12 +64,20 @@ class SpriteStrip(QScrollArea):
         for path in paths:
             self._layout.addWidget(self._make_sprite_label(path))
 
+    @staticmethod
+    def natural_key(path):
+        s = path.name
+        return [int(t) if t.isdigit() else t.lower()
+                for t in re.split(r'(\d+)', s)]
+
     def _discover_images(self) -> list[Path]:
         if not self._folder.is_dir():
             return []
+
         return sorted(
-            p for p in self._folder.iterdir()
-            if p.is_file() and p.suffix.lower() in IMAGE_EXTENSIONS
+            (p for p in self._folder.iterdir()
+            if p.is_file() and p.suffix.lower() in IMAGE_EXTENSIONS),
+            key=lambda p: self.natural_key(p)
         )
 
     def _make_sprite_label(self, path: Path) -> QLabel:
@@ -103,3 +99,9 @@ class SpriteStrip(QScrollArea):
         label.setPixmap(scaled)
         label.clicked.connect(self.sprite_clicked.emit)
         return label
+
+    def sizeHint(self):
+        return self._layout.sizeHint()
+
+    def minimumSizeHint(self):
+        return self._layout.minimumSize()
