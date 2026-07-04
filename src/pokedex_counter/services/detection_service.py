@@ -53,7 +53,7 @@ class DetectionService(QObject):
                     best_score = max_val
                     best_name = name
 
-                    if best_score > 0.98:
+                    if best_score > 0.90:
                         break  # near-perfect match, stop scanning this ROI early
 
             if best_name is not None and best_score > THRESHOLD:
