@@ -38,9 +38,6 @@ class DetectionService(QObject):
                 best_score = max_val
                 best_name = name
 
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-        print(best_score, best_name)
-        cv2.imshow("OBS Frame", frame)
         if best_score > THRESHOLD:
             now = time.time()
             print("DETECTED:", best_name, best_score)
