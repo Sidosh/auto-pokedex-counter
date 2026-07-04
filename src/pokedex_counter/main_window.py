@@ -1,11 +1,12 @@
 """Main application window."""
 
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, Signal
 from PySide6.QtGui import QResizeEvent
 from PySide6.QtWidgets import (
     QMainWindow,
     QWidget,
     QVBoxLayout,
+    QLabel
 )
 
 from pokedex_counter.config import APP_NAME, SPRITES_DIR
@@ -13,12 +14,10 @@ from pokedex_counter.ui.widgets.sprite_strip import SpriteStrip
 
 
 class MainWindow(QMainWindow):
-    """The application's main window."""
-
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle(APP_NAME)
-        self.resize(880, 880)
+        self.resize(300, 600)
 
         self._build_ui()
 
@@ -32,7 +31,16 @@ class MainWindow(QMainWindow):
 
         layout.addWidget(self.sprite_strip)
 
+        self.sprite_strip.count_changed.connect(self._update_counter)
+        self.counter_label = QLabel("0")
+        self.counter_label.setStyleSheet("margin-top: 10px;")
+
+        layout.addWidget(self.counter_label)
+
         self.setCentralWidget(self._central_widget)
+
+    def _update_counter(self, value: int):
+        self.counter_label.setText(f"{value}")
 
     def resizeEvent(self, event: QResizeEvent) -> None:
         QTimer.singleShot(0, self._sync_height_to_width)

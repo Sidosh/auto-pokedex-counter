@@ -20,7 +20,7 @@ IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp"}
 class ClickableLabel(QLabel):
     clicked = Signal(Path)
 
-    BASE_STYLE = "padding: 4px;"
+    BASE_STYLE = "padding: 3px;"
 
     def __init__(self, path: Path, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -46,11 +46,13 @@ class ClickableLabel(QLabel):
 
 class SpriteStrip(QWidget):
     sprite_clicked = Signal(Path)
+    count_changed = Signal(int)
 
     def __init__(self, folder: Path, sprite_size: int = 24, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._folder = Path(folder)
         self._sprite_size = sprite_size
+        self._count = 0 
 
         self._layout = FlowLayout(self)
 
@@ -107,7 +109,10 @@ class SpriteStrip(QWidget):
             Qt.TransformationMode.SmoothTransformation,
         )
         label.setPixmap(scaled)
-        label.clicked.connect(self.sprite_clicked.emit)
+
+        # IMPORTANT: connect via handler, not direct emit
+        label.clicked.connect(self._on_sprite_clicked)
+
         return label
 
     def sizeHint(self):
@@ -115,3 +120,15 @@ class SpriteStrip(QWidget):
 
     def minimumSizeHint(self):
         return self._layout.minimumSize()
+
+    def _on_sprite_clicked(self, path: Path) -> None:
+        label = self.sender()
+
+        if isinstance(label, ClickableLabel):
+            if label._selected:
+                self._count += 1
+            else:
+                self._count -= 1
+
+            self.count_changed.emit(self._count)
+            self.sprite_clicked.emit(path)
