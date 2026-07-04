@@ -1,8 +1,8 @@
-"""Entry point: `python -m my_app`."""
+"""Entry point: `python -m pokedex_counter`."""
 
 import sys
 
-from my_app.app import run
+from pokedex_counter.app import run
 
 if __name__ == "__main__":
     sys.exit(run())

@@ -17,7 +17,7 @@ dev = [
 ]
 
 [project.scripts]
-my-desktop-app = "my_app.app:run"
+my-desktop-app = "pokedex_counter.app:run"
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]

@@ -2,7 +2,7 @@
 
 import pytest
 
-from my_app.main_window import MainWindow
+from pokedex_counter.main_window import MainWindow
 
 
 @pytest.fixture

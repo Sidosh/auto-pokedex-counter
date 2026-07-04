@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ENTRY_POINT = ROOT / "src" / "my_app" / "__main__.py"
+ENTRY_POINT = ROOT / "src" / "pokedex_counter" / "__main__.py"
 
 
 def main() -> None:

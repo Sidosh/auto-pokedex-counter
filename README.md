@@ -13,7 +13,7 @@ pip install -e ".[dev]"
 ## Run
 
 ```bash
-python -m my_app
+python -m pokedex_counter
 ```
 
 ## Test
@@ -33,8 +33,8 @@ This produces a single executable in `dist/` using PyInstaller.
 ## Project structure
 
 ```
-src/my_app/          Application source code
-  __main__.py         Entry point (`python -m my_app`)
+src/pokedex_counter/          Application source code
+  __main__.py         Entry point (`python -m pokedex_counter`)
   app.py              QApplication bootstrap
   main_window.py       Main window UI
   config.py           App-wide constants

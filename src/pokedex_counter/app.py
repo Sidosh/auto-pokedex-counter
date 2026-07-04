@@ -4,7 +4,7 @@ import sys
 
 from PySide6.QtWidgets import QApplication
 
-from my_app.main_window import MainWindow
+from pokedex_counter.main_window import MainWindow
 
 
 def run() -> int:

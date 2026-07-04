@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
     QPushButton,
 )
 
-from my_app.config import APP_NAME
+from pokedex_counter.config import APP_NAME
 
 
 class MainWindow(QMainWindow):
