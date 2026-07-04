@@ -10,3 +10,6 @@ ORGANIZATION_NAME = "MyOrg"
 RESOURCES_DIR = Path(__file__).resolve().parent / "resources"
 SPRITES_DIR = RESOURCES_DIR / "sprites"
 SPRITES_BG_DIR = RESOURCES_DIR / "sprites_background"
+
+ROI = (348, 43, 100, 100) 
+THRESHOLD = 0.80 

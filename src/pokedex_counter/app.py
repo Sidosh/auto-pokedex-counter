@@ -1,7 +1,7 @@
 from pathlib import Path
 from PySide6.QtWidgets import QApplication
 
-from pokedex_counter.config import SPRITES_DIR
+from pokedex_counter.config import SPRITES_BG_DIR
 from pokedex_counter.controllers.game_controller import GameController
 from pokedex_counter.main_window import MainWindow
 from pokedex_counter.services.capture_service import CaptureService
@@ -16,7 +16,7 @@ def run() -> int:
     controller = GameController()
 
     # --- vision ---
-    templates = TemplateService(Path(SPRITES_DIR)).templates
+    templates = TemplateService(Path(SPRITES_BG_DIR)).templates
     detector = DetectionService(templates)
 
     capture = CaptureService()
