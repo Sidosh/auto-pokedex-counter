@@ -5,10 +5,10 @@ from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QLabel,
-    QPushButton,
 )
 
-from pokedex_counter.config import APP_NAME
+from pokedex_counter.config import APP_NAME, SPRITES_DIR
+from pokedex_counter.ui.widgets.sprite_strip import SpriteStrip
 
 
 class MainWindow(QMainWindow):
@@ -19,27 +19,15 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(APP_NAME)
         self.resize(480, 320)
 
-        self._click_count = 0
-
         self._build_ui()
 
     def _build_ui(self) -> None:
         central_widget = QWidget()
         layout = QVBoxLayout(central_widget)
 
-        self.label = QLabel("Hello, world! 👋")
-        self.label.setStyleSheet("font-size: 20px;")
+        self.sprite_strip = SpriteStrip(SPRITES_DIR)
 
-        self.button = QPushButton("Click me")
-        self.button.clicked.connect(self._on_button_clicked)
-
-        layout.addStretch()
-        layout.addWidget(self.label, alignment=self.label.alignment())
-        layout.addWidget(self.button)
-        layout.addStretch()
+        layout.addWidget(QLabel("Sprites:"))
+        layout.addWidget(self.sprite_strip)
 
         self.setCentralWidget(central_widget)
-
-    def _on_button_clicked(self) -> None:
-        self._click_count += 1
-        self.label.setText(f"Clicked {self._click_count} time(s)")
