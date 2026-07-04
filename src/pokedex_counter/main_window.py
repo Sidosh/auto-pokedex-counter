@@ -43,8 +43,11 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(self._central_widget)
 
+    def bind_controller(self, controller):
+        controller.count_changed.connect(self._update_counter)
+
     def _update_counter(self, value: int):
-        self.counter_label.setText(f"{value}")
+        self.counter_label.setText(f"{value} caught")
 
     def resizeEvent(self, event: QResizeEvent) -> None:
         QTimer.singleShot(0, self._sync_height_to_width)
