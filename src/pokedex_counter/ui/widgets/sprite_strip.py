@@ -3,8 +3,8 @@ window is resized."""
 
 from pathlib import Path
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QPixmap
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QMouseEvent, QPixmap
 from PySide6.QtWidgets import (
     QLabel,
     QScrollArea,
@@ -17,8 +17,30 @@ from pokedex_counter.ui.widgets.flow_layout import FlowLayout
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp"}
 
 
+class ClickableLabel(QLabel):
+    """A QLabel that emits `clicked` with its associated path when left-clicked,
+    and highlights itself with a black background while selected."""
+
+    clicked = Signal(Path)
+
+    def __init__(self, path: Path, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self._path = path
+        self._selected = False
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._selected = not self._selected
+            self.setStyleSheet("background-color: black;" if self._selected else "")
+            self.clicked.emit(self._path)
+        super().mousePressEvent(event)
+
+
 class SpriteStrip(QScrollArea):
     """A grid of images, found in `folder`, that wraps onto new rows on resize."""
+
+    sprite_clicked = Signal(Path)
 
     def __init__(self, folder: Path, sprite_size: int = 24, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -63,7 +85,7 @@ class SpriteStrip(QScrollArea):
         )
 
     def _make_sprite_label(self, path: Path) -> QLabel:
-        label = QLabel()
+        label = ClickableLabel(path)
         label.setToolTip(path.name)
         label.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
@@ -79,4 +101,5 @@ class SpriteStrip(QScrollArea):
             Qt.TransformationMode.SmoothTransformation,
         )
         label.setPixmap(scaled)
+        label.clicked.connect(self.sprite_clicked.emit)
         return label
