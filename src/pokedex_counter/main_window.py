@@ -1,7 +1,7 @@
 """Main application window."""
 
 from PySide6.QtCore import QTimer, Signal
-from PySide6.QtGui import QResizeEvent
+from PySide6.QtGui import QResizeEvent, QFontDatabase, QFont
 from PySide6.QtWidgets import (
     QMainWindow,
     QWidget,
@@ -33,7 +33,11 @@ class MainWindow(QMainWindow):
 
         self.sprite_strip.count_changed.connect(self._update_counter)
         self.counter_label = QLabel("0")
-        self.counter_label.setStyleSheet("margin-top: 10px;")
+        self.counter_label.setStyleSheet("margin-top: 10px; font-size: 24px")
+        font_id = QFontDatabase.addApplicationFont("assets/fonts/Pokemon Solid.ttf")
+        families = QFontDatabase.applicationFontFamilies(font_id)
+        font = QFont(families[0])
+        self.counter_label.setFont(font)
 
         layout.addWidget(self.counter_label)
 
