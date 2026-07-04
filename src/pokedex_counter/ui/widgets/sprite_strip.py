@@ -5,44 +5,17 @@ from pathlib import Path
 import re
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QMouseEvent, QPixmap
+from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (
     QLabel,
     QSizePolicy,
     QWidget,
 )
 
+from pokedex_counter.ui.widgets.clickable_label import ClickableLabel
 from pokedex_counter.ui.widgets.flow_layout import FlowLayout
 
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp"}
-
-
-class ClickableLabel(QLabel):
-    clicked = Signal(Path)
-
-    BASE_STYLE = "padding: 3px;"
-
-    def __init__(self, path: Path, parent: QWidget | None = None) -> None:
-        super().__init__(parent)
-        self._path = path
-        self._selected = False
-        self.setStyleSheet(self.BASE_STYLE)
-        self.setCursor(Qt.CursorShape.PointingHandCursor)
-
-    def mousePressEvent(self, event: QMouseEvent) -> None:
-
-        if event.button() == Qt.MouseButton.LeftButton:
-            self._selected = not self._selected
-
-            if self._selected:
-                self.setStyleSheet(self.BASE_STYLE + "background-color: black;")
-            else:
-                self.setStyleSheet(self.BASE_STYLE)
-
-            self.clicked.emit(self._path)
-
-        super().mousePressEvent(event)
-
 
 class SpriteStrip(QWidget):
     sprite_clicked = Signal(Path)
@@ -52,7 +25,8 @@ class SpriteStrip(QWidget):
         super().__init__(parent)
         self._folder = Path(folder)
         self._sprite_size = sprite_size
-        self._count = 0 
+        self._count = 0
+        self._labels_by_name: dict[str, ClickableLabel] = {}
 
         self._layout = FlowLayout(self)
 
@@ -65,6 +39,9 @@ class SpriteStrip(QWidget):
             if widget is not None:
                 widget.deleteLater()
 
+        self._labels_by_name.clear()
+        self._count = 0
+
         paths = self._discover_images()
 
         if not paths:
@@ -74,7 +51,9 @@ class SpriteStrip(QWidget):
             return
 
         for path in paths:
-            self._layout.addWidget(self._make_sprite_label(path))
+            label = self._make_sprite_label(path)
+            self._labels_by_name[path.stem] = label
+            self._layout.addWidget(label)
 
     @staticmethod
     def natural_key(path):
@@ -114,6 +93,22 @@ class SpriteStrip(QWidget):
         label.clicked.connect(self._on_sprite_clicked)
 
         return label
+
+    def select_sprite(self, name: str) -> bool:
+        label = self._labels_by_name.get(name)
+        if label is None:
+            return False
+
+        label.select()
+        return True
+
+    def deselect_sprite(self, name: str) -> bool:
+        label = self._labels_by_name.get(name)
+        if label is None:
+            return False
+
+        label.deselect()
+        return True
 
     def sizeHint(self):
         return self._layout.sizeHint()

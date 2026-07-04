@@ -16,7 +16,6 @@ class CaptureService(QThread):
             if not ret:
                 continue
 
-            print("running")
             self.frame_ready.emit(frame)
 
     def stop(self):

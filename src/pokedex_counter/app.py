@@ -29,7 +29,8 @@ def run() -> int:
     capture.frame_ready.connect(detector.process_frame)
     detector.detection.connect(controller.on_detection)
 
-    controller.count_changed.connect(window._update_counter)
+    controller.pokemon_found.connect(window.sprite_strip.select_sprite)
+    window.sprite_strip.count_changed.connect(window._update_counter)
 
     # --- start ---
     capture.start()
