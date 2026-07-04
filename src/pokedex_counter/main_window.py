@@ -35,9 +35,6 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self._central_widget)
 
     def resizeEvent(self, event: QResizeEvent) -> None:
-        if event.oldSize().width() == event.size().width():
-            return
-
         QTimer.singleShot(0, self._sync_height_to_width)
 
     def _sync_height_to_width(self) -> None:
