@@ -29,6 +29,9 @@ class DetectionService(QObject):
     def process_frame(self, frame):
         frame = cv2.flip(frame, 1)
         frame = cv2.resize(frame, FRAME_SIZE)
+        
+        best_value = -1
+        best_name = ""
 
         for entry in self._entries:
             x, y, w, h = entry["roi"]
@@ -40,14 +43,18 @@ class DetectionService(QObject):
             crop_gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
             result = cv2.matchTemplate(crop_gray, entry["template"], cv2.TM_CCOEFF_NORMED)
             _, max_val, _, _ = cv2.minMaxLoc(result)
+            
+            if max_val > best_value:
+                best_value = max_val
+                best_name = entry["name"]
+                
 
-            if max_val > self.threshold:
-                name = entry["name"]
-                now = time.time()
+        if best_value > self.threshold:
+            now = time.time()
 
-                if now - self.cooldowns.get(name, 0) > self.cooldown_time:
-                    self.cooldowns[name] = now
-                    self.detection.emit(name)
+            if now - self.cooldowns.get(best_name, 0) > self.cooldown_time:
+                self.cooldowns[best_name] = now
+                self.detection.emit(best_name)
                     
     def clear_cooldown(self, name: str) -> None:
         self.cooldowns.pop(name, None)
