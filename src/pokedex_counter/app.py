@@ -1,5 +1,6 @@
 from pathlib import Path
 from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import Qt
 
 from pokedex_counter.config import SPRITES_BG_DIR
 from pokedex_counter.controllers.game_controller import GameController
@@ -33,7 +34,7 @@ def run() -> int:
 
     # --- WIRING (VERY IMPORTANT) ---
 
-    capture.frame_ready.connect(detector.process_frame)
+    capture.frame_ready.connect(detector.process_frame, Qt.ConnectionType.DirectConnection)
     detector.detection.connect(controller.on_detection)
 
     controller.pokemon_found.connect(window.sprite_strip.select_sprite)
