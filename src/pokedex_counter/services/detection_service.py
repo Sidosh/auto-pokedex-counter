@@ -7,7 +7,7 @@ from PySide6.QtCore import QObject, Signal
 class DetectionService(QObject):
     detection = Signal(str)
 
-    def __init__(self, roi_templates, threshold=0.85, cooldown_time=2.0):
+    def __init__(self, roi_templates, threshold=0.8, cooldown_time=2.0):
         super().__init__()
         self.threshold = threshold
         self.cooldown_time = cooldown_time
@@ -26,7 +26,7 @@ class DetectionService(QObject):
 
     def process_frame(self, frame):
         frame = cv2.flip(frame, 1)
-        frame = cv2.resize(frame, (640, 360))
+        frame = cv2.resize(frame, (320, 180))
 
         for entry in self._entries:
             x, y, w, h = entry["roi"]
