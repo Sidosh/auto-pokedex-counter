@@ -1,4 +1,3 @@
-# vision/capture.py
 import cv2
 from PySide6.QtCore import QThread, Signal
 
@@ -15,7 +14,6 @@ class CaptureService(QThread):
             ret, frame = self.cap.read()
             if not ret:
                 continue
-
             self.frame_ready.emit(frame)
 
     def stop(self):

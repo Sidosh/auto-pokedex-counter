@@ -3,6 +3,8 @@ import time
 import cv2
 from PySide6.QtCore import QObject, Signal
 
+from pokedex_counter.config import FRAME_SIZE
+
 
 class DetectionService(QObject):
     detection = Signal(str)
@@ -26,7 +28,7 @@ class DetectionService(QObject):
 
     def process_frame(self, frame):
         frame = cv2.flip(frame, 1)
-        frame = cv2.resize(frame, (320, 180))
+        frame = cv2.resize(frame, FRAME_SIZE)
 
         for entry in self._entries:
             x, y, w, h = entry["roi"]

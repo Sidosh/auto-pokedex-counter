@@ -12,3 +12,5 @@ SPRITES_DIR = RESOURCES_DIR / "sprites"
 SPRITES_BG_DIR = RESOURCES_DIR / "sprites_background"
 
 THRESHOLD = 0.80 
+
+FRAME_SIZE = (640, 360)
