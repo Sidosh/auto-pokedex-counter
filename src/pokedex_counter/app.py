@@ -37,6 +37,8 @@ def run() -> int:
     detector.detection.connect(controller.on_detection)
 
     controller.pokemon_found.connect(window.sprite_strip.select_sprite)
+    window.sprite_strip.sprite_deselected.connect(controller.forget)
+    window.sprite_strip.sprite_deselected.connect(detector.clear_cooldown)
     window.sprite_strip.count_changed.connect(window._update_counter)
 
     # --- start ---

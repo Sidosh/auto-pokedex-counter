@@ -19,6 +19,7 @@ IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp"}
 
 class SpriteStrip(QWidget):
     sprite_clicked = Signal(Path)
+    sprite_deselected = Signal(str)
     count_changed = Signal(int)
 
     def __init__(self, folder: Path, sprite_size: int = 24, parent: QWidget | None = None) -> None:
@@ -124,6 +125,7 @@ class SpriteStrip(QWidget):
                 self._count += 1
             else:
                 self._count -= 1
+                self.sprite_deselected.emit(path.stem)   # NEW
 
             self.count_changed.emit(self._count)
             self.sprite_clicked.emit(path)

@@ -46,3 +46,6 @@ class DetectionService(QObject):
                 if now - self.cooldowns.get(name, 0) > self.cooldown_time:
                     self.cooldowns[name] = now
                     self.detection.emit(name)
+                    
+    def clear_cooldown(self, name: str) -> None:
+        self.cooldowns.pop(name, None)

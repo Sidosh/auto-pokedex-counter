@@ -19,3 +19,6 @@ class GameController(QObject):
 
         self.pokemon_found.emit(name)
         self.count_changed.emit(self.count)
+
+    def forget(self, name: str) -> None:
+        self.found.discard(name)
