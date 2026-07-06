@@ -1,6 +1,6 @@
-ROI_CATCH = (350, 40, 100, 100)
-ROI_EVOLVE = (262, 56, 100, 100)
-ROI_TEXT = (178, 200, 284, 82)
+ROI_CATCH = (348, 41, 99, 99)
+ROI_EVOLVE = (263, 55, 99, 99)
+ROI_TEXT = (178, 198, 283, 82)
 
 ROI_CONFIG = [
     ["1", ROI_CATCH],
@@ -175,3 +175,5 @@ ROI_CONFIG = [
     ["150", ROI_CATCH],
     ["151", ROI_CATCH],
 ]
+
+# 45:49
