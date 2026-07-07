@@ -11,6 +11,6 @@ RESOURCES_DIR = Path(__file__).resolve().parent / "resources"
 SPRITES_DIR = RESOURCES_DIR / "sprites"
 SPRITES_BG_DIR = RESOURCES_DIR / "sprites_background"
 
-THRESHOLD = 0.80 
+THRESHOLD = 0.90
 
 FRAME_SIZE = (640, 360)
