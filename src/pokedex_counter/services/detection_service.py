@@ -4,14 +4,14 @@ import time
 import cv2
 from PySide6.QtCore import QObject, Signal
 
-from pokedex_counter.config import FRAME_SIZE
+from pokedex_counter.config import FRAME_SIZE, THRESHOLD
 
 
 class DetectionService(QObject):
     detection = Signal(str)
     debug_scores = Signal(str, float)
 
-    def __init__(self, roi_templates, threshold=0.85, cooldown_time=2.0, debug=False):
+    def __init__(self, roi_templates, threshold=THRESHOLD, cooldown_time=2.0, debug=False):
         super().__init__()
         self.threshold = threshold
         self.cooldown_time = cooldown_time
