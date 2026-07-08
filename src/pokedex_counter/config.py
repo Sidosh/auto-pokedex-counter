@@ -18,6 +18,7 @@ else:
 RESOURCES_DIR = _PACKAGE_DIR / "resources"
 SPRITES_DIR = RESOURCES_DIR / "sprites"
 SPRITES_BG_DIR = RESOURCES_DIR / "sprites_background"
+FONTS_DIR = RESOURCES_DIR / "fonts"
 
 THRESHOLD = 0.85
 

@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
     QLabel
 )
 
-from pokedex_counter.config import APP_NAME, SPRITES_DIR
+from pokedex_counter.config import APP_NAME, FONTS_DIR, SPRITES_DIR
 from pokedex_counter.ui.widgets.sprite_strip import SpriteStrip
 
 
@@ -34,10 +34,10 @@ class MainWindow(QMainWindow):
         self.sprite_strip.count_changed.connect(self._update_counter)
         self.counter_label = QLabel("0")
         self.counter_label.setStyleSheet("margin-top: 10px; font-size: 24px")
-        font_id = QFontDatabase.addApplicationFont("assets/fonts/Pokemon Solid.ttf")
+        font_id = QFontDatabase.addApplicationFont(str(FONTS_DIR / "Pokemon Solid.ttf"))
         families = QFontDatabase.applicationFontFamilies(font_id)
-        font = QFont(families[0])
-        self.counter_label.setFont(font)
+        if families:
+            self.counter_label.setFont(QFont(families[0]))
 
         layout.addWidget(self.counter_label)
 
