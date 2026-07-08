@@ -1,3 +1,5 @@
+import ast
+import os
 import re
 from pathlib import Path
 
@@ -13,8 +15,9 @@ def update_roi_constants(config_path: Path, locked: dict[str, tuple[int, int, in
         if const_name is None:
             continue
 
+        expected = tuple(box)
         pattern = re.compile(rf"^{const_name}\s*=\s*\([^)]*\)", re.MULTILINE)
-        replacement = f"{const_name} = {tuple(box)}"
+        replacement = f"{const_name} = {expected}"
 
         new_text, count = pattern.subn(replacement, text)
         if count == 0:
@@ -23,8 +26,20 @@ def update_roi_constants(config_path: Path, locked: dict[str, tuple[int, int, in
         if count > 1:
             print(f"[roi_writer] WARNING: found {count} matches for `{const_name}` — updated all")
 
+        match = pattern.search(new_text)
+        actual = ast.literal_eval(match.group().split("=", 1)[1].strip())
+        if actual != expected:
+            raise ValueError(
+                f"[roi_writer] Refusing to write {config_path}: round-trip check for "
+                f"{const_name} produced {actual!r}, expected {expected!r}"
+            )
+
         text = new_text
         updated.append(const_name)
 
-    config_path.write_text(text)
+    if updated:
+        tmp_path = config_path.with_suffix(config_path.suffix + ".tmp")
+        tmp_path.write_text(text)
+        os.replace(tmp_path, config_path)
+
     return updated
