@@ -3,6 +3,7 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt
 
 from pokedex_counter.calibration_runner import calibrate_on_startup
+from pokedex_counter.camera import resolve_camera_index
 from pokedex_counter.config import SPRITES_BG_DIR
 from pokedex_counter.controllers.game_controller import GameController
 from pokedex_counter.main_window import MainWindow
@@ -12,7 +13,8 @@ from pokedex_counter.services.template_service import TemplateService
 
 
 def run() -> int:
-    locked = calibrate_on_startup()
+    camera_index = resolve_camera_index()
+    locked = calibrate_on_startup(camera_index=camera_index)
 
     from pokedex_counter.roi_config import resolve_roi_templates
 
@@ -27,7 +29,7 @@ def run() -> int:
 
     detector = DetectionService(roi_templates)
 
-    capture = CaptureService()
+    capture = CaptureService(camera_index=camera_index)
 
     # --- UI ---
     window = MainWindow()

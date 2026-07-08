@@ -6,7 +6,7 @@ A small [PySide6](https://doc.qt.io/qtforpython-6/) overlay window for tracking 
 
 Grab the latest `PokedexCounter.exe` from the [Releases page](https://github.com/Sidosh/auto-pokedex-counter/releases) and run it. Windows only.
 
-It expects a camera/capture device at index 2 (e.g. a capture card feeding your Game Boy or emulator video) — that's currently hardcoded, so if your device is on a different index you'll need to run from source (see below) with `camera_index` changed in `app.py`/`calibration_runner.py`.
+It looks for a device named **"OBS Virtual Camera"** and uses that automatically — so start the OBS Virtual Camera before launching the app. If it can't find one (e.g. it's not running yet, or you renamed it), it falls back to camera index 2.
 
 ### What happens on launch: calibration
 
