@@ -12,9 +12,9 @@ from pokedex_counter.services.template_service import TemplateService
 
 
 def run() -> int:
-    calibrate_on_startup()
+    locked = calibrate_on_startup()
 
-    from pokedex_counter.roi_config import ROI_CONFIG
+    from pokedex_counter.roi_config import resolve_roi_templates
 
     app = QApplication([])
 
@@ -23,11 +23,7 @@ def run() -> int:
 
     # --- vision ---
     templates = TemplateService(Path(SPRITES_BG_DIR)).templates
-
-    roi_templates = [
-        (name, roi, templates[name])
-        for name, roi in ROI_CONFIG
-    ]
+    roi_templates = resolve_roi_templates(templates, locked)
 
     detector = DetectionService(roi_templates)
 

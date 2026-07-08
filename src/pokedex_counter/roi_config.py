@@ -175,3 +175,27 @@ ROI_CONFIG = [
     ["150", ROI_CATCH],
     ["151", ROI_CATCH],
 ]
+
+_LABEL_BY_ROI_ID = {id(ROI_CATCH): "CATCH", id(ROI_EVOLVE): "EVOLVE", id(ROI_TEXT): "TEXT"}
+
+
+def resolve_roi_templates(templates: dict, locked: dict[str, tuple[int, int, int, int]] | None = None):
+    """Build (name, roi, template) triples from ROI_CONFIG, substituting
+    freshly calibrated boxes (as returned by calibrate_on_startup) for
+    ROI_CATCH/ROI_EVOLVE/ROI_TEXT in-memory for this session.
+
+    calibrate_on_startup() persists locked ROIs back into this file on a
+    best-effort basis (e.g. it can't when frozen into an exe), but this app
+    run must use them regardless of whether that write succeeded — hence
+    applying `locked` here instead of relying on re-importing this module.
+    """
+    locked = locked or {}
+    effective = {
+        "CATCH": locked.get("CATCH", ROI_CATCH),
+        "EVOLVE": locked.get("EVOLVE", ROI_EVOLVE),
+        "TEXT": locked.get("TEXT", ROI_TEXT),
+    }
+    return [
+        (name, effective[_LABEL_BY_ROI_ID[id(roi)]], templates[name])
+        for name, roi in ROI_CONFIG
+    ]

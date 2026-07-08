@@ -5,13 +5,11 @@ import numpy as np
 import pytest
 
 from pokedex_counter.config import SPRITES_BG_DIR
-from pokedex_counter.roi_config import ROI_CATCH, ROI_CONFIG, ROI_EVOLVE, ROI_TEXT
+from pokedex_counter.roi_config import resolve_roi_templates
 from pokedex_counter.services.detection_service import DetectionService
 from pokedex_counter.services.template_service import TemplateService
 
 DETECTION_FIXTURES_DIR = Path(__file__).parent.parent / "fixtures" / "detection"
-
-_LABEL_BY_ROI_ID = {id(ROI_CATCH): "catch", id(ROI_EVOLVE): "evolve", id(ROI_TEXT): "text"}
 
 DETECTION_CASES = [
     ("calibration_01.png", "catch", "catch_01.png", "97"),
@@ -30,10 +28,8 @@ def sprite_templates():
 
 def _roi_templates_for(calibration_fixture, sprite_templates, calibrated_rois):
     rois = calibrated_rois[calibration_fixture]
-    return [
-        (name, rois[_LABEL_BY_ROI_ID[id(roi)]], sprite_templates[name])
-        for name, roi in ROI_CONFIG
-    ]
+    locked = {"CATCH": rois["catch"], "EVOLVE": rois["evolve"], "TEXT": rois["text"]}
+    return resolve_roi_templates(sprite_templates, locked)
 
 
 @pytest.mark.parametrize("calibration_fixture, label, detection_fixture, expected_name", DETECTION_CASES)
