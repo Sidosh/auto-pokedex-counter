@@ -12,10 +12,11 @@ It expects a camera/capture device at index 2 (e.g. a capture card feeding your 
 
 Every time the app starts, it calibrates itself before the counter window opens:
 
-1. A small "Calibration" preview window pops up showing your camera feed.
-2. Point the feed at the **Pokémon title screen** (the "Pokémon Blue Version" boot screen) — the app matches against that screen to figure out exactly where on your camera frame the catch/evolution/nickname regions are. This is necessary because everyone's camera framing and streaming layout is different.
-3. Colored boxes on the preview show live match confidence for the three regions it's searching for. Once all three are found confidently and held steady for a moment, the preview closes automatically and the counter window opens.
-4. Press `Esc` at any point to skip calibration — the app falls back to whatever positions worked last time instead.
+1. You need to launch the OBS Virtual Camera
+2. A small "Calibration" preview window pops up showing your camera feed.
+3. Point the feed at the **Pokémon title screen** (the "Pokémon Blue Version" boot screen) — the app matches against that screen to figure out exactly where on your camera frame the catch/evolution/nickname regions are. This is necessary because everyone's camera framing and streaming layout is different.
+4. Colored boxes on the preview show live match confidence for the three regions it's searching for. Once all three are found confidently and held steady for a moment, the preview closes automatically and the counter window opens.
+5. Press `Esc` at any point to skip calibration — the app falls back to whatever positions worked last time instead.
 
 A successful calibration is remembered for next launch (saved as a `roi_config.py` file next to the `.exe`), so you typically only need to re-do it if your camera framing changes.
 
