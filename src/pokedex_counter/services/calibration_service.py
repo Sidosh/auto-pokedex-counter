@@ -9,8 +9,8 @@ from pokedex_counter.vision.template_matching import find_best_match
 DEFAULT_SCALES = np.linspace(0.1, 5.0, 500)
 DEFAULT_LOCK_THRESHOLD = 0.95
 DEFAULT_CONFIRM_DELAY = 0.2
-DEFAULT_POSITION_TOLERANCE = 5
-DEFAULT_MIN_ROI_SIZE = (40, 40)
+DEFAULT_POSITION_TOLERANCE = 1
+DEFAULT_MIN_ROI_SIZE = (30, 30)
 
 
 def _boxes_close(box_a, box_b, tolerance) -> bool:
