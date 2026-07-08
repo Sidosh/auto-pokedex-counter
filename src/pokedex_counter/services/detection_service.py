@@ -16,15 +16,19 @@ class DetectionService(QObject):
         self.threshold = threshold
         self.cooldown_time = cooldown_time
         self.cooldowns: dict[str, float] = {}
-        self.debug = debug  
-        self._entries = [
-            {
-                "name": name,
-                "roi": roi,
-                "template": cv2.resize(template, (roi[2], roi[3])),
-            }
-            for name, roi, template in roi_templates
-        ]
+        self.debug = debug
+
+        self._roi_groups: list[tuple[tuple[int, int, int, int], list[tuple[str, "cv2.Mat"]]]] = []
+        group_by_roi = {}
+        for name, roi, template in roi_templates:
+            resized = cv2.resize(template, (roi[2], roi[3]))
+            group = group_by_roi.get(roi)
+            if group is None:
+                group = []
+                group_by_roi[roi] = group
+                self._roi_groups.append((roi, group))
+            group.append((name, resized))
+
         self.timestamp = time.strftime("%Y%m%d_%H%M%S")
 
     def process_frame(self, frame):
@@ -34,20 +38,22 @@ class DetectionService(QObject):
         best_value = -1
         best_name = ""
 
-        for entry in self._entries:
-            x, y, w, h = entry["roi"]
+        for roi, entries in self._roi_groups:
+            x, y, w, h = roi
             crop = frame[y:y + h, x:x + w]
 
             if crop.size == 0:
                 continue
 
             crop_gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
-            result = cv2.matchTemplate(crop_gray, entry["template"], cv2.TM_CCOEFF_NORMED)
-            _, max_val, _, _ = cv2.minMaxLoc(result)
 
-            if max_val > best_value:
-                best_value = max_val
-                best_name = entry["name"]
+            for name, template in entries:
+                result = cv2.matchTemplate(crop_gray, template, cv2.TM_CCOEFF_NORMED)
+                _, max_val, _, _ = cv2.minMaxLoc(result)
+
+                if max_val > best_value:
+                    best_value = max_val
+                    best_name = name
 
         if self.debug and best_name:
             self.debug_scores.emit(best_name, best_value)
@@ -60,6 +66,7 @@ class DetectionService(QObject):
                 self.detection.emit(best_name)
                 print(f"Detected {best_name}: {best_value}")
                 screenshot_path = Path(f"screenshots_{self.timestamp}/{best_name}.png")
+                screenshot_path.parent.mkdir(parents=True, exist_ok=True)
                 cv2.imwrite(str(screenshot_path), frame)
 
     def clear_cooldown(self, name: str) -> None:
