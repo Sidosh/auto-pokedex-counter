@@ -6,10 +6,15 @@ class CaptureService(QThread):
 
     def __init__(self, camera_index=2):
         super().__init__()
-        self.cap = cv2.VideoCapture(camera_index)
+        self.camera_index = camera_index
+        self.cap = cv2.VideoCapture(camera_index, cv2.CAP_DSHOW)
         self.running = True
 
     def run(self):
+        if not self.cap.isOpened():
+            print(f"[CaptureService] ERROR: could not open camera index {self.camera_index}")
+            return
+
         while self.running:
             ret, frame = self.cap.read()
             if not ret:
