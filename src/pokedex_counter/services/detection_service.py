@@ -11,12 +11,11 @@ class DetectionService(QObject):
     detection = Signal(str)
     debug_scores = Signal(str, float)
 
-    def __init__(self, roi_templates, threshold=THRESHOLD, cooldown_time=2.0, debug=False):
+    def __init__(self, roi_templates, threshold=THRESHOLD, debug=False):
         super().__init__()
         self.threshold = threshold
-        self.cooldown_time = cooldown_time
-        self.cooldowns: dict[str, float] = {}
         self.debug = debug
+        self._detected: set[str] = set()
 
         self._roi_groups: list[tuple[tuple[int, int, int, int], list[tuple[str, "cv2.Mat"]]]] = []
         group_by_roi = {}
@@ -58,16 +57,13 @@ class DetectionService(QObject):
         if self.debug and best_name:
             self.debug_scores.emit(best_name, best_value)
 
-        if best_value > self.threshold:
-            now = time.time()
+        if best_value > self.threshold and best_name not in self._detected:
+            self._detected.add(best_name)
+            self.detection.emit(best_name)
+            print(f"Detected {best_name}: {best_value}")
+            screenshot_path = Path(f"screenshots_{self.timestamp}/{best_name}.png")
+            screenshot_path.parent.mkdir(parents=True, exist_ok=True)
+            cv2.imwrite(str(screenshot_path), frame)
 
-            if now - self.cooldowns.get(best_name, 0) > self.cooldown_time:
-                self.cooldowns[best_name] = now
-                self.detection.emit(best_name)
-                print(f"Detected {best_name}: {best_value}")
-                screenshot_path = Path(f"screenshots_{self.timestamp}/{best_name}.png")
-                screenshot_path.parent.mkdir(parents=True, exist_ok=True)
-                cv2.imwrite(str(screenshot_path), frame)
-
-    def clear_cooldown(self, name: str) -> None:
-        self.cooldowns.pop(name, None)
+    def forget(self, name: str) -> None:
+        self._detected.discard(name)

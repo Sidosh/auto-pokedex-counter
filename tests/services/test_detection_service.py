@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import cv2
+import numpy as np
 import pytest
 
 from pokedex_counter.config import SPRITES_BG_DIR
@@ -27,15 +28,19 @@ def sprite_templates():
     return TemplateService(Path(SPRITES_BG_DIR)).templates
 
 
+def _roi_templates_for(calibration_fixture, sprite_templates, calibrated_rois):
+    rois = calibrated_rois[calibration_fixture]
+    return [
+        (name, rois[_LABEL_BY_ROI_ID[id(roi)]], sprite_templates[name])
+        for name, roi in ROI_CONFIG
+    ]
+
+
 @pytest.mark.parametrize("calibration_fixture, label, detection_fixture, expected_name", DETECTION_CASES)
 def test_calibrated_roi_detects_expected_pokemon(
     sprite_templates, calibrated_rois, calibration_fixture, label, detection_fixture, expected_name
 ):
-    rois = calibrated_rois[calibration_fixture]
-    roi_templates = [
-        (name, rois[_LABEL_BY_ROI_ID[id(roi)]], sprite_templates[name])
-        for name, roi in ROI_CONFIG
-    ]
+    roi_templates = _roi_templates_for(calibration_fixture, sprite_templates, calibrated_rois)
 
     detector = DetectionService(roi_templates)
     detections = []
@@ -49,3 +54,29 @@ def test_calibrated_roi_detects_expected_pokemon(
         f"{calibration_fixture} -> {detection_fixture} ({label}): "
         f"expected detection {expected_name!r}, got {detections}"
     )
+
+
+def test_repeated_frames_detect_only_once_until_forgotten(sprite_templates, calibrated_rois):
+    roi_templates = _roi_templates_for("calibration_01.png", sprite_templates, calibrated_rois)
+
+    detector = DetectionService(roi_templates)
+    detections = []
+    detector.detection.connect(detections.append)
+
+    frame = cv2.imread(str(DETECTION_FIXTURES_DIR / "catch_01.png"))
+    flipped = cv2.flip(frame, 1)
+
+    # Same screen held across many frames (e.g. player hasn't pressed a
+    # button yet) must only fire the signal once, not once per frame.
+    for _ in range(5):
+        detector.process_frame(flipped)
+    assert detections == ["97"]
+
+    # A frame with nothing recognizable must not re-trigger it either.
+    detector.process_frame(np.zeros_like(flipped))
+    assert detections == ["97"]
+
+    # Only forgetting it (manual "unclick" in the UI) allows re-detection.
+    detector.forget("97")
+    detector.process_frame(flipped)
+    assert detections == ["97", "97"]
