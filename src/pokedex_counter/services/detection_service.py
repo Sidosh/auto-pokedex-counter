@@ -1,6 +1,4 @@
 # vision/detector.py
-from pathlib import Path
-import time
 import cv2
 from PySide6.QtCore import QObject, Signal
 
@@ -27,8 +25,6 @@ class DetectionService(QObject):
                 group_by_roi[roi] = group
                 self._roi_groups.append((roi, group))
             group.append((name, resized))
-
-        self.timestamp = time.strftime("%Y%m%d_%H%M%S")
 
     def process_frame(self, frame):
         frame = cv2.flip(frame, 1)
@@ -61,9 +57,6 @@ class DetectionService(QObject):
             self._detected.add(best_name)
             self.detection.emit(best_name)
             print(f"Detected {best_name}: {best_value}")
-            screenshot_path = Path(f"screenshots_{self.timestamp}/{best_name}.png")
-            screenshot_path.parent.mkdir(parents=True, exist_ok=True)
-            cv2.imwrite(str(screenshot_path), frame)
 
     def forget(self, name: str) -> None:
         self._detected.discard(name)
