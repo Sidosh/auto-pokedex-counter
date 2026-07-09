@@ -11,6 +11,7 @@ class FlowLayout(QLayout):
 
         self.setSpacing(spacing)
         self._item_list = []
+        self._columns: int | None = None
 
     # -------------------------
     # Core Qt contract
@@ -36,6 +37,15 @@ class FlowLayout(QLayout):
 
     def hasHeightForWidth(self) -> bool:
         return True
+
+    def set_columns(self, columns: int | None) -> None:
+        """Set a fixed number of items per row, overriding the default
+        pixel-width-based wrapping. Pass None to go back to width-based
+        wrapping."""
+        if columns == self._columns:
+            return
+        self._columns = columns
+        self.invalidate()
 
     # -------------------------
     # Geometry logic
@@ -73,6 +83,7 @@ class FlowLayout(QLayout):
     def _do_layout(self, rect: QRect, test_only: bool) -> int:
         x, y = rect.x(), rect.y()
         line_height = 0
+        col = 0
         spacing = self._smart_spacing()
 
         for i in range(self.count()):
@@ -101,17 +112,23 @@ class FlowLayout(QLayout):
 
             next_x = x + hint.width() + space_x
 
-            # WRAP CONDITION (fixed)
-            if next_x > rect.right() + 1 and line_height > 0:
+            if self._columns is not None:
+                should_wrap = col >= self._columns
+            else:
+                should_wrap = next_x > rect.right() + 1 and line_height > 0
+
+            if should_wrap:
                 x = rect.x()
                 y += line_height + space_y
                 next_x = x + hint.width() + space_x
                 line_height = 0
+                col = 0
 
             if not test_only:
                 item.setGeometry(QRect(QPoint(x, y), hint))
 
             x = next_x
+            col += 1
             line_height = max(line_height, hint.height())
 
         return (y + line_height - rect.y())

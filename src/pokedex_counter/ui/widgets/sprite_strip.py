@@ -118,6 +118,9 @@ class SpriteStrip(QWidget):
         for name in self._labels_by_name:
             self.deselect_sprite(name)
 
+    def set_columns(self, columns: int) -> None:
+        self._layout.set_columns(columns)
+
     def sizeHint(self):
         return self._layout.sizeHint()
 

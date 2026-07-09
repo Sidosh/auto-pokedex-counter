@@ -49,6 +49,10 @@ class MainWindow(QMainWindow):
     def _update_counter(self, value: int):
         self.counter_label.setText(f"{value} caught")
 
+    def set_sprites_per_row(self, columns: int) -> None:
+        self.sprite_strip.set_columns(columns)
+        QTimer.singleShot(0, self._sync_height_to_width)
+
     def resizeEvent(self, event: QResizeEvent) -> None:
         QTimer.singleShot(0, self._sync_height_to_width)
 
