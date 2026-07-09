@@ -1,10 +1,10 @@
 from pathlib import Path
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSettings
 
 from pokedex_counter.calibration_runner import run_calibration
 from pokedex_counter.camera import resolve_camera_index
-from pokedex_counter.config import SPRITES_BG_DIR
+from pokedex_counter.config import APP_NAME, ORGANIZATION_NAME, SPRITES_BG_DIR
 from pokedex_counter.controllers.game_controller import GameController
 from pokedex_counter.main_window import MainWindow
 from pokedex_counter.services.capture_service import CaptureService
@@ -35,6 +35,13 @@ def run() -> int:
     window = MainWindow()
     settings = SettingsWindow()
 
+    # --- persisted settings ---
+    prefs = QSettings(ORGANIZATION_NAME, APP_NAME)
+    settings.columns_spinbox.setValue(int(prefs.value("sprites_per_row", settings.columns_spinbox.value())))
+    settings.font_size_spinbox.setValue(int(prefs.value("counter_font_size", settings.font_size_spinbox.value())))
+    settings.columns_spinbox.valueChanged.connect(lambda v: prefs.setValue("sprites_per_row", v))
+    settings.font_size_spinbox.valueChanged.connect(lambda v: prefs.setValue("counter_font_size", v))
+
     # --- WIRING (VERY IMPORTANT) ---
 
     capture.frame_ready.connect(detector.process_frame, Qt.ConnectionType.DirectConnection)
@@ -63,6 +70,7 @@ def run() -> int:
 
     # --- start ---
     window.set_sprites_per_row(settings.columns_spinbox.value())
+    window.set_counter_font_size(settings.font_size_spinbox.value())
     capture.start()
     window.show()
     settings.move(window.x() + window.frameGeometry().width() + 10, window.y())
