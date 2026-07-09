@@ -2,191 +2,95 @@ ROI_CATCH = (383, 35, 127, 127)
 ROI_EVOLVE = (275, 54, 126, 126)
 ROI_TEXT = (367, 273, 140, 50)
 
-ROI_CONFIG = [
-    ["1", ROI_CATCH],
-    ["2", ROI_CATCH],
-    ["3", ROI_EVOLVE],
-    ["4", ROI_CATCH],
-    ["5", ROI_EVOLVE],
-    ["6", ROI_EVOLVE],
-    ["7", ROI_CATCH],
-    ["8", ROI_EVOLVE],
-    ["9", ROI_EVOLVE],
-    ["10", ROI_CATCH],
-    ["11", ROI_CATCH],
-    ["12", ROI_EVOLVE],
-    ["13", ROI_CATCH],
-    ["14", ROI_EVOLVE],
-    ["15", ROI_EVOLVE],
-    ["16", ROI_CATCH],
-    ["17", ROI_CATCH],
-    ["18", ROI_EVOLVE],
-    ["19", ROI_CATCH],
-    ["20", ROI_CATCH],
-    ["20", ROI_EVOLVE],
-    ["21", ROI_CATCH],
-    ["22", ROI_CATCH],
-    ["23", ROI_CATCH],
-    ["24", ROI_EVOLVE],
-    ["25", ROI_CATCH],
-    ["26", ROI_CATCH],
-    ["26", ROI_EVOLVE],
-    ["27", ROI_CATCH],
-    ["28", ROI_CATCH],
-    ["28", ROI_EVOLVE],
-    ["29", ROI_CATCH],
-    ["30", ROI_EVOLVE],
-    ["31", ROI_EVOLVE],
-    ["32", ROI_CATCH],
-    ["33", ROI_TEXT],
-    ["34", ROI_EVOLVE],
-    ["35", ROI_TEXT],
-    ["36", ROI_EVOLVE],
-    ["37", ROI_CATCH],
-    ["38", ROI_EVOLVE],
-    ["39", ROI_CATCH],
-    ["40", ROI_CATCH],
-    ["40", ROI_EVOLVE],
-    ["41", ROI_CATCH],
-    ["42", ROI_CATCH],
-    ["42", ROI_EVOLVE],
-    ["43", ROI_CATCH],
-    ["44", ROI_EVOLVE],
-    ["45", ROI_EVOLVE],
-    ["46", ROI_CATCH],
-    ["47", ROI_CATCH],
-    ["47", ROI_EVOLVE],
-    ["48", ROI_CATCH],
-    ["49", ROI_CATCH],
-    ["49", ROI_EVOLVE],
-    ["50", ROI_CATCH],
-    ["51", ROI_CATCH],
-    ["51", ROI_EVOLVE],
-    ["52", ROI_CATCH],
-    ["53", ROI_EVOLVE],
-    ["54", ROI_CATCH],
-    ["55", ROI_CATCH],
-    ["55", ROI_EVOLVE],
-    ["56", ROI_CATCH],
-    ["57", ROI_EVOLVE],
-    ["58", ROI_CATCH],
-    ["59", ROI_EVOLVE],
-    ["60", ROI_CATCH],
-    ["61", ROI_EVOLVE],
-    ["62", ROI_EVOLVE],
-    ["63", ROI_TEXT],
-    ["64", ROI_CATCH],
-    ["64", ROI_EVOLVE],
-    ["65", ROI_CATCH],
-    ["66", ROI_CATCH],
-    ["67", ROI_CATCH],
-    ["67", ROI_EVOLVE],
-    ["68", ROI_CATCH],
-    ["69", ROI_CATCH],
-    ["70", ROI_EVOLVE],
-    ["71", ROI_EVOLVE],
-    ["72", ROI_CATCH],
-    ["73", ROI_EVOLVE],
-    ["74", ROI_CATCH],
-    ["75", ROI_CATCH],
-    ["75", ROI_EVOLVE],
-    ["76", ROI_CATCH],
-    ["77", ROI_CATCH],
-    ["78", ROI_EVOLVE],
-    ["79", ROI_CATCH],
-    ["80", ROI_EVOLVE],
-    ["81", ROI_CATCH],
-    ["82", ROI_CATCH],
-    ["83", ROI_CATCH],
-    ["84", ROI_CATCH],
-    ["85", ROI_CATCH],
-    ["85", ROI_EVOLVE],
-    ["86", ROI_CATCH],
-    ["87", ROI_CATCH],
-    ["87", ROI_EVOLVE],
-    ["88", ROI_CATCH],
-    ["89", ROI_CATCH],
-    ["89", ROI_EVOLVE],
-    ["90", ROI_CATCH],
-    ["91", ROI_EVOLVE],
-    ["92", ROI_CATCH],
-    ["93", ROI_EVOLVE],
-    ["94", ROI_CATCH],
-    ["95", ROI_CATCH],
-    ["96", ROI_CATCH],
-    ["97", ROI_CATCH],
-    ["97", ROI_EVOLVE],
-    ["98", ROI_CATCH],
-    ["99", ROI_CATCH],
-    ["99", ROI_EVOLVE],
-    ["100", ROI_CATCH],
-    ["101", ROI_CATCH],
-    ["101", ROI_EVOLVE],
-    ["102", ROI_CATCH],
-    ["103", ROI_EVOLVE],
-    ["104", ROI_CATCH],
-    ["105", ROI_CATCH],
-    ["105", ROI_EVOLVE],
-    ["106", ROI_CATCH],
-    ["107", ROI_CATCH],
-    ["108", ROI_CATCH],
-    ["109", ROI_CATCH],
-    ["110", ROI_CATCH],
-    ["111", ROI_CATCH],
-    ["112", ROI_CATCH],
-    ["112", ROI_EVOLVE],
-    ["113", ROI_CATCH],
-    ["114", ROI_CATCH],
-    ["115", ROI_CATCH],
-    ["116", ROI_CATCH],
-    ["117", ROI_EVOLVE],
-    ["118", ROI_CATCH],
-    ["119", ROI_EVOLVE],
-    ["120", ROI_CATCH],
-    ["121", ROI_EVOLVE],
-    ["122", ROI_CATCH],
-    ["123", ROI_CATCH],
-    ["124", ROI_CATCH],
-    ["125", ROI_CATCH],
-    ["126", ROI_CATCH],
-    ["127", ROI_TEXT],
-    ["128", ROI_CATCH],
-    ["129", ROI_CATCH],
-    ["130", ROI_EVOLVE],
-    ["131", ROI_TEXT],
-    ["132", ROI_CATCH],
-    ["133", ROI_TEXT],
-    ["134", ROI_EVOLVE],
-    ["135", ROI_EVOLVE],
-    ["136", ROI_EVOLVE],
-    ["137", ROI_TEXT],
-    ["138", ROI_TEXT],
-    ["139", ROI_EVOLVE],
-    ["140", ROI_CATCH],
-    ["141", ROI_EVOLVE],
-    ["142", ROI_TEXT],
-    ["143", ROI_CATCH],
-    ["144", ROI_CATCH],
-    ["145", ROI_CATCH],
-    ["146", ROI_CATCH],
-    ["147", ROI_TEXT],
-    ["148", ROI_EVOLVE],
-    ["149", ROI_CATCH],
-    ["150", ROI_CATCH],
-    ["151", ROI_CATCH],
+# Dex numbers whose "obtained" event is only ever confirmed via a name-text
+# banner (trade evolutions etc.) rather than a sprite match against
+# ROI_CATCH/ROI_EVOLVE.
+TEXT_NAMES = {"33", "35", "63", "127", "131", "133", "137", "138", "142", "147"}
+
+# Dex numbers that have an ROI_EVOLVE screen event (something evolves into
+# them). Used to sweep any evolution not explicitly routed into a section
+# below into the final section - see build_catch_sections().
+EVOLVE_NAMES = {
+    "3", "5", "6", "8", "9", "12", "14", "15", "18", "20", "24", "26", "28",
+    "30", "31", "34", "36", "38", "40", "42", "44", "45", "47", "49", "51",
+    "53", "55", "57", "59", "61", "62", "64", "67", "70", "71", "73", "75",
+    "78", "80", "85", "87", "89", "91", "93", "97", "99", "101", "103",
+    "105", "112", "117", "119", "121", "130", "134", "135", "136", "139",
+    "141", "148",
+}
+
+# Hand-authored catch route: this specific playthrough's actual order,
+# which does NOT follow ascending dex-number order (some Pokemon are only
+# reachable well out of dex order, or via a detour). Detection only looks
+# for the Pokemon in the currently active section (see DetectionService);
+# a section's LAST entry is the trigger that advances to the next section.
+# Order otherwise within a section doesn't matter. A dex number may repeat
+# across sections if it can legitimately be caught in more than one of
+# them.
+CATCH_SECTIONS_RAW: list[list[str]] = [
+    ["1", "16", "10", "51", "46", "29", "32", "102", "23", "122"],
+    ["76", "97", "42", "28", "47", "64", "82", "40", "128", "113", "101",
+     "85", "49", "26", "65", "112", "105", "150", "115"],
+    ["82", "90", "54", "55", "42", "98", "99", "86", "87", "120", "129", "144"],
+    ["66", "67", "74", "75", "42", "105", "49", "41", "95", "67", "68", "123"],
+    ["21", "96", "27", "107", "58", "50", "109", "146", "48"],
+    ["92", "126", "94", "22", "37", "19", "20", "17", "72", "4", "114"],
+    ["21", "19", "84", "111", "11", "140", "116", "149", "143", "151"],
+    ["118", "39", "104", "47", "103", "30", "31", "43"],
+    ["25", "81", "26", "100", "145", "83", "106", "7"],
+    ["33", "35", "63", "127", "137", "147", "69", "56", "2", "131", "13"],
+    ["138", "142", "133", "124", "132", "52", "77", "88", "89", "110", "125",
+     "60", "79", "108"],
 ]
 
-_LABEL_BY_ROI_ID = {id(ROI_CATCH): "CATCH", id(ROI_EVOLVE): "EVOLVE", id(ROI_TEXT): "TEXT"}
+# Within these sections, these dex numbers refer to their ROI_EVOLVE event
+# rather than the default CATCH/TEXT one.
+SECTION_EVOLVE_OVERRIDES: dict[int, set[str]] = {
+    7: {"30", "31", "47", "103"},  # section 8 (0-indexed 7)
+}
+
+# The dex number whose detection advances to the next section. The final
+# section has none - there's nothing left to advance to.
+SECTION_TRIGGERS: list[str | None] = [
+    names[-1] if idx < len(CATCH_SECTIONS_RAW) - 1 else None
+    for idx, names in enumerate(CATCH_SECTIONS_RAW)
+]
 
 
-def resolve_roi_templates(templates: dict, locked: dict[str, tuple[int, int, int, int]] | None = None):
-    """Build (name, roi, template) triples from ROI_CONFIG, substituting
-    freshly calibrated boxes (as returned by calibrate_on_startup) for
-    ROI_CATCH/ROI_EVOLVE/ROI_TEXT in-memory for this session.
+def _entry_type(section_index: int, name: str) -> str:
+    if name in SECTION_EVOLVE_OVERRIDES.get(section_index, ()):
+        return "EVOLVE"
+    if name in TEXT_NAMES:
+        return "TEXT"
+    return "CATCH"
+
+
+def build_catch_sections() -> list[list[tuple[str, str]]]:
+    """Expand CATCH_SECTIONS_RAW into (name, roi_label) pairs, then sweep
+    every EVOLVE-type dex number not already placed in some section onto
+    the end of the final section - evolutions not explicitly routed
+    earlier all get caught up in one pass at the end of the run."""
+    sections = [
+        [(name, _entry_type(idx, name)) for name in names]
+        for idx, names in enumerate(CATCH_SECTIONS_RAW)
+    ]
+    placed_evolves = {name for section in sections for name, rtype in section if rtype == "EVOLVE"}
+    sections[-1] += [(name, "EVOLVE") for name in sorted(EVOLVE_NAMES - placed_evolves, key=int)]
+    return sections
+
+
+CATCH_SECTIONS: list[list[tuple[str, str]]] = build_catch_sections()
+
+
+def build_detection_entries(templates: dict, locked: dict[str, tuple[int, int, int, int]] | None = None):
+    """Build (name, roi, template, section_index) quadruples from
+    CATCH_SECTIONS, substituting freshly calibrated boxes (as returned by
+    calibrate_on_startup) for ROI_CATCH/ROI_EVOLVE/ROI_TEXT in-memory for
+    this session.
 
     calibrate_on_startup() persists locked ROIs back into this file on a
     best-effort basis (e.g. it can't when frozen into an exe), but this app
-    run must use them regardless of whether that write succeeded — hence
+    run must use them regardless of whether that write succeeded - hence
     applying `locked` here instead of relying on re-importing this module.
     """
     locked = locked or {}
@@ -196,6 +100,7 @@ def resolve_roi_templates(templates: dict, locked: dict[str, tuple[int, int, int
         "TEXT": locked.get("TEXT", ROI_TEXT),
     }
     return [
-        (name, effective[_LABEL_BY_ROI_ID[id(roi)]], templates[name])
-        for name, roi in ROI_CONFIG
+        (name, effective[roi_label], templates[name], section_index)
+        for section_index, section in enumerate(CATCH_SECTIONS)
+        for name, roi_label in section
     ]

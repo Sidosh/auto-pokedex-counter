@@ -16,7 +16,7 @@ def run() -> int:
     camera_index = resolve_camera_index()
     locked = calibrate_on_startup(camera_index=camera_index)
 
-    from pokedex_counter.roi_config import resolve_roi_templates
+    from pokedex_counter.roi_config import build_detection_entries
 
     app = QApplication([])
 
@@ -25,7 +25,7 @@ def run() -> int:
 
     # --- vision ---
     templates = TemplateService(Path(SPRITES_BG_DIR)).templates
-    roi_templates = resolve_roi_templates(templates, locked)
+    roi_templates = build_detection_entries(templates, locked)
 
     detector = DetectionService(roi_templates)
 
