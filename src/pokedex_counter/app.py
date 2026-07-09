@@ -2,7 +2,7 @@ from pathlib import Path
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt
 
-from pokedex_counter.calibration_runner import calibrate_on_startup
+from pokedex_counter.calibration_runner import run_calibration
 from pokedex_counter.camera import resolve_camera_index
 from pokedex_counter.config import SPRITES_BG_DIR
 from pokedex_counter.controllers.game_controller import GameController
@@ -10,11 +10,11 @@ from pokedex_counter.main_window import MainWindow
 from pokedex_counter.services.capture_service import CaptureService
 from pokedex_counter.services.detection_service import DetectionService
 from pokedex_counter.services.template_service import TemplateService
+from pokedex_counter.settings_window import SettingsWindow
 
 
 def run() -> int:
     camera_index = resolve_camera_index()
-    locked = calibrate_on_startup(camera_index=camera_index)
 
     from pokedex_counter.roi_config import build_detection_entries
 
@@ -25,7 +25,7 @@ def run() -> int:
 
     # --- vision ---
     templates = TemplateService(Path(SPRITES_BG_DIR)).templates
-    roi_templates = build_detection_entries(templates, locked)
+    roi_templates = build_detection_entries(templates)  # defaults; no boot-time calibration
 
     detector = DetectionService(roi_templates)
 
@@ -33,6 +33,7 @@ def run() -> int:
 
     # --- UI ---
     window = MainWindow()
+    settings = SettingsWindow()
 
     # --- WIRING (VERY IMPORTANT) ---
 
@@ -44,8 +45,27 @@ def run() -> int:
     window.sprite_strip.sprite_deselected.connect(detector.forget)
     window.sprite_strip.count_changed.connect(window._update_counter)
 
+    settings.columns_spinbox.valueChanged.connect(window.set_sprites_per_row)
+    settings.font_size_spinbox.valueChanged.connect(window.set_counter_font_size)
+    settings.reset_button.clicked.connect(window.sprite_strip.reset)
+
+    def on_calibrate_clicked() -> None:
+        nonlocal capture
+        capture.stop()
+        locked = run_calibration(camera_index=camera_index)
+        if locked:
+            detector.update_rois(build_detection_entries(templates, locked))
+        capture = CaptureService(camera_index=camera_index)
+        capture.frame_ready.connect(detector.process_frame, Qt.ConnectionType.DirectConnection)
+        capture.start()
+
+    settings.calibrate_button.clicked.connect(on_calibrate_clicked)
+
     # --- start ---
+    window.set_sprites_per_row(settings.columns_spinbox.value())
     capture.start()
     window.show()
+    settings.move(window.x() + window.frameGeometry().width() + 10, window.y())
+    settings.show()
 
     return app.exec()
