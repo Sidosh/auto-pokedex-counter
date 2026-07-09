@@ -54,6 +54,12 @@ class MainWindow(QMainWindow):
 
     def set_sprites_per_row(self, columns: int) -> None:
         self.sprite_strip.set_columns(columns)
+
+        width = self.sprite_strip.natural_width()
+        if width > 0:
+            margins = self._central_widget.layout().contentsMargins()
+            self.setFixedWidth(width + margins.left() + margins.right())
+
         QTimer.singleShot(0, self._sync_height_to_width)
 
     def set_counter_font_size(self, points: int) -> None:

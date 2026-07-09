@@ -121,6 +121,9 @@ class SpriteStrip(QWidget):
     def set_columns(self, columns: int) -> None:
         self._layout.set_columns(columns)
 
+    def natural_width(self) -> int:
+        return self._layout.natural_width()
+
     def sizeHint(self):
         return self._layout.sizeHint()
 

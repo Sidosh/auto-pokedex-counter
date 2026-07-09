@@ -47,6 +47,21 @@ class FlowLayout(QLayout):
         self._columns = columns
         self.invalidate()
 
+    def natural_width(self) -> int:
+        """Width needed to fit `self._columns` items in a row without
+        wrapping early, based on each item's own size hint. 0 if there's no
+        fixed column count or no items yet."""
+        if self._columns is None or self.count() == 0:
+            return 0
+
+        spacing = self._smart_spacing()
+        n = min(self._columns, self.count())
+        total = sum(self.itemAt(i).sizeHint().width() for i in range(n))
+        total += spacing * (n - 1)
+
+        margins = self.contentsMargins()
+        return total + margins.left() + margins.right()
+
     # -------------------------
     # Geometry logic
     # -------------------------
