@@ -37,6 +37,14 @@ class ClickableLabel(QLabel):
         self._apply_style()
         self.clicked.emit(self._path)
 
+    def deselect(self) -> None:
+        """Programmatically deselect (idempotent - no-op if not selected)."""
+        if not self._selected:
+            return
+        self._selected = False
+        self._apply_style()
+        self.clicked.emit(self._path)
+
     def _apply_style(self) -> None:
         if self._selected:
             self.setStyleSheet(self.BASE_STYLE + "background-color: black;")
