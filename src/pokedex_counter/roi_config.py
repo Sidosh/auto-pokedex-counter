@@ -1,6 +1,6 @@
 ROI_CATCH = (383, 35, 127, 127)
 ROI_EVOLVE = (275, 54, 126, 126)
-ROI_TEXT = (367, 273, 140, 50)
+ROI_TEXT = (367, 273, 142, 51)
 
 # Dex numbers whose "obtained" event is only ever confirmed via a name-text
 # banner (trade evolutions etc.) rather than a sprite match against
@@ -85,10 +85,10 @@ CATCH_SECTIONS: list[list[tuple[str, str]]] = build_catch_sections()
 def build_detection_entries(templates: dict, locked: dict[str, tuple[int, int, int, int]] | None = None):
     """Build (name, roi, template, section_index) quadruples from
     CATCH_SECTIONS, substituting freshly calibrated boxes (as returned by
-    calibrate_on_startup) for ROI_CATCH/ROI_EVOLVE/ROI_TEXT in-memory for
+    run_calibration) for ROI_CATCH/ROI_EVOLVE/ROI_TEXT in-memory for
     this session.
 
-    calibrate_on_startup() persists locked ROIs back into this file on a
+    run_calibration() persists locked ROIs back into this file on a
     best-effort basis (e.g. it can't when frozen into an exe), but this app
     run must use them regardless of whether that write succeeded - hence
     applying `locked` here instead of relying on re-importing this module.

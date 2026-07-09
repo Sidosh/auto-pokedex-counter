@@ -1,4 +1,4 @@
-"""Locks in build_detection_entries()'s contract: calibrate_on_startup()'s
+"""Locks in build_detection_entries()'s contract: run_calibration()'s
 locked ROIs must apply in-memory for this session regardless of whether
 they got persisted to disk (see test_calibration_runner.py and
 test_roi_writer.py for the persistence side of that).

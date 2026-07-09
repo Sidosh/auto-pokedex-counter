@@ -1,4 +1,4 @@
-"""Locks in the two things calibrate_on_startup() must guarantee beyond
+"""Locks in the two things run_calibration() must guarantee beyond
 what roi_writer.py already covers: it targets a writable location whether
 running from source or frozen into an exe, and it returns the locked ROIs
 so this session uses them in-memory even if persisting them to disk fails
@@ -67,7 +67,7 @@ def _fake_calibration_service(locked):
     return factory
 
 
-def test_calibrate_on_startup_returns_locked_rois_even_if_persistence_fails(monkeypatch, tmp_path):
+def test_run_calibration_returns_locked_rois_even_if_persistence_fails(monkeypatch, tmp_path):
     monkeypatch.setattr(
         calibration_runner, "CalibrationService", _fake_calibration_service({"CATCH": (1, 2, 3, 4)})
     )
@@ -77,26 +77,26 @@ def test_calibrate_on_startup_returns_locked_rois_even_if_persistence_fails(monk
     unwritable = tmp_path / "does" / "not" / "exist" / "roi_config.py"
     monkeypatch.setattr(calibration_runner, "_writable_roi_config_path", lambda: unwritable)
 
-    locked = calibration_runner.calibrate_on_startup()
+    locked = calibration_runner.run_calibration()
 
     assert locked == {"CATCH": (1, 2, 3, 4)}
     assert not unwritable.exists()
 
 
-def test_calibrate_on_startup_persists_when_writable(monkeypatch, tmp_path):
+def test_run_calibration_persists_when_writable(monkeypatch, tmp_path):
     monkeypatch.setattr(
         calibration_runner, "CalibrationService", _fake_calibration_service({"CATCH": (9, 9, 9, 9)})
     )
     config_path = tmp_path / "roi_config.py"
     monkeypatch.setattr(calibration_runner, "_writable_roi_config_path", lambda: config_path)
 
-    locked = calibration_runner.calibrate_on_startup()
+    locked = calibration_runner.run_calibration()
 
     assert locked == {"CATCH": (9, 9, 9, 9)}
     assert "ROI_CATCH = (9, 9, 9, 9)" in config_path.read_text()
 
 
-def test_calibrate_on_startup_returns_empty_dict_when_nothing_locked(monkeypatch):
+def test_run_calibration_returns_empty_dict_when_nothing_locked(monkeypatch):
     monkeypatch.setattr(calibration_runner, "CalibrationService", _fake_calibration_service({}))
 
-    assert calibration_runner.calibrate_on_startup() == {}
+    assert calibration_runner.run_calibration() == {}

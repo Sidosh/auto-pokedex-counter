@@ -24,3 +24,4 @@ class CaptureService(QThread):
     def stop(self):
         self.running = False
         self.cap.release()
+        self.wait()

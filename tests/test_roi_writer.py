@@ -1,4 +1,4 @@
-"""Locks in the behaviour calibrate_on_startup() relies on: writing freshly
+"""Locks in the behaviour run_calibration() relies on: writing freshly
 calibrated ROIs back into roi_config.py's ROI_CATCH/ROI_EVOLVE/ROI_TEXT
 constants in place, atomically, without disturbing the rest of the file.
 """

@@ -22,7 +22,7 @@ def _writable_roi_config_path() -> Path:
     file `from pokedex_counter.roi_config import ...` reads). A frozen exe
     has no such writable file — its modules are baked into the bundle — so
     it gets its own roi_config.py next to the executable instead. Either
-    way, calibrate_on_startup() also returns the locked ROIs so the current
+    way, run_calibration() also returns the locked ROIs so the current
     run doesn't depend on this write (or a re-import) succeeding.
     """
     if getattr(sys, "frozen", False):
@@ -39,7 +39,7 @@ def _ensure_seeded(config_path: Path) -> None:
     config_path.write_text(_SEED_TEMPLATE.format(catch=ROI_CATCH, evolve=ROI_EVOLVE, text=ROI_TEXT))
 
 
-def calibrate_on_startup(camera_index=2) -> dict[str, tuple[int, int, int, int]]:
+def run_calibration(camera_index=2) -> dict[str, tuple[int, int, int, int]]:
     calibration_dir = RESOURCES_DIR / "calibration"
 
     templates = {}

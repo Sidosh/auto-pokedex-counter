@@ -162,3 +162,29 @@ def test_forgetting_the_trigger_rolls_back_the_active_section():
     detector.forget(name_b)
     detector.process_frame(frame_b)
     assert detections == [name_a, name_b]
+
+
+def test_update_rois_rebuilds_groups_without_touching_detected():
+    roi = (0, 0, 20, 20)
+    detector = DetectionService([("A", roi, _pattern(1), 0)])
+    detector._detected.add("A")
+
+    new_roi = (0, 0, 25, 25)
+    detector.update_rois([("B", new_roi, _pattern(2), 0)])
+
+    assert "A" in detector._detected  # mid-run progress survives recalibration
+    assert [roi for roi, _entries in detector._roi_groups] == [new_roi]
+    names_in_group = {name for name, _template, _section in detector._roi_groups[0][1]}
+    assert names_in_group == {"B"}
+
+
+def test_update_rois_new_templates_are_matched_immediately():
+    roi = (0, 0, 20, 20)
+    detector = DetectionService([("A", roi, _pattern(1), 0)])
+    detections = []
+    detector.detection.connect(detections.append)
+
+    detector.update_rois([("B", roi, _pattern(2), 0)])
+    detector.process_frame(_frame_with_pattern_at(roi, _pattern(2)))
+
+    assert detections == ["B"]

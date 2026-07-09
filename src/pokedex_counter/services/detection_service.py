@@ -20,15 +20,23 @@ class DetectionService(QObject):
         # roi -> [(name, resized_template, section_index), ...], grouped so
         # each distinct screen region is cropped/converted only once a frame.
         self._roi_groups: list[tuple[tuple[int, int, int, int], list[tuple[str, "cv2.Mat", int]]]] = []
+        self.update_rois(roi_templates)
+
+    def update_rois(self, roi_templates) -> None:
+        """Rebuild the ROI/template grouping in place (e.g. after
+        recalibration). Deliberately leaves `_detected` untouched - progress
+        made so far in the current run must survive a recalibration."""
         group_by_roi = {}
+        roi_groups = []
         for name, roi, template, section_index in roi_templates:
             resized = cv2.resize(template, (roi[2], roi[3]))
             group = group_by_roi.get(roi)
             if group is None:
                 group = []
                 group_by_roi[roi] = group
-                self._roi_groups.append((roi, group))
+                roi_groups.append((roi, group))
             group.append((name, resized, section_index))
+        self._roi_groups = roi_groups
 
     def _active_section(self) -> int:
         """The currently active section, derived live from `_detected` (not
