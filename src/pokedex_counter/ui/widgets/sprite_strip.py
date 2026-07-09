@@ -111,6 +111,13 @@ class SpriteStrip(QWidget):
         label.deselect()
         return True
 
+    def reset(self) -> None:
+        """Deselect every sprite, going through the same per-sprite deselect
+        path a manual un-click takes so count/controller/detector state all
+        stay consistent."""
+        for name in self._labels_by_name:
+            self.deselect_sprite(name)
+
     def sizeHint(self):
         return self._layout.sizeHint()
 
