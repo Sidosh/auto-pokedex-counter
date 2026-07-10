@@ -22,4 +22,11 @@ FONTS_DIR = RESOURCES_DIR / "fonts"
 
 THRESHOLD = 0.85
 
+# Minimum gap (0-255 grayscale units) required between adjacent k-means
+# shade-cluster centers for canonicalize_shades() to trust the clustering.
+# Below this, treat the crop as having no reliable 4-shade structure
+# (blank/transition frame) rather than rank-remapping noise into a
+# fabricated full-contrast pattern.
+MIN_SHADE_SEPARATION = 15.0
+
 FRAME_SIZE = (640, 360)
