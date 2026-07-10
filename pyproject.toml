@@ -1,6 +1,6 @@
 [project]
 name = "pokedex_counter"
-version = "0.2.0"
+version = "0.3.0"
 description = "A Pokedex Counter for RB 151"
 readme = "README.md"
 requires-python = ">=3.9"
