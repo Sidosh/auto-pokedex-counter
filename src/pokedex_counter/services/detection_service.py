@@ -2,7 +2,7 @@
 import cv2
 from PySide6.QtCore import QObject, Signal
 
-from pokedex_counter.config import FRAME_SIZE, THRESHOLD
+from pokedex_counter.config import FRAME_SIZE, ROI_SEARCH_MARGIN, THRESHOLD
 from pokedex_counter.roi_config import SECTION_TRIGGERS
 from pokedex_counter.vision.template_matching import canonicalize_shades
 
@@ -77,7 +77,12 @@ class DetectionService(QObject):
                 continue
 
             x, y, w, h = roi
-            crop = frame[y:y + h, x:x + w]
+            frame_h, frame_w = frame.shape[:2]
+            x0 = max(0, x - ROI_SEARCH_MARGIN)
+            y0 = max(0, y - ROI_SEARCH_MARGIN)
+            x1 = min(frame_w, x + w + ROI_SEARCH_MARGIN)
+            y1 = min(frame_h, y + h + ROI_SEARCH_MARGIN)
+            crop = frame[y0:y1, x0:x1]
 
             if crop.size == 0:
                 continue

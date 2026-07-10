@@ -29,4 +29,12 @@ THRESHOLD = 0.85
 # fabricated full-contrast pattern.
 MIN_SHADE_SEPARATION = 15.0
 
+# Extra pixels of padding added around each calibrated ROI before matching,
+# so cv2.matchTemplate can search for the best-aligned position instead of
+# assuming the calibrated position is exactly right. Different capture
+# sessions (even against the same physical setup) can drift by a pixel or
+# two - sprite icons are blocky enough to tolerate that, but fine text
+# glyphs are not, so this margin matters most for ROI_TEXT.
+ROI_SEARCH_MARGIN = 4
+
 FRAME_SIZE = (640, 360)
