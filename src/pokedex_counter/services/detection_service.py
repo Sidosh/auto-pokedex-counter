@@ -4,6 +4,7 @@ from PySide6.QtCore import QObject, Signal
 
 from pokedex_counter.config import FRAME_SIZE, THRESHOLD
 from pokedex_counter.roi_config import SECTION_TRIGGERS
+from pokedex_counter.vision.template_matching import canonicalize_shades
 
 
 class DetectionService(QObject):
@@ -17,9 +18,13 @@ class DetectionService(QObject):
         self._detected: set[str] = set()
         self._section_triggers = SECTION_TRIGGERS
 
-        # roi -> [(name, resized_template, section_index), ...], grouped so
-        # each distinct screen region is cropped/converted only once a frame.
-        self._roi_groups: list[tuple[tuple[int, int, int, int], list[tuple[str, "cv2.Mat", int]]]] = []
+        # roi -> [(name, resized_template, canonical_template, section_index), ...],
+        # grouped so each distinct screen region is cropped/converted only
+        # once a frame. canonical_template is None when the template's
+        # shades aren't well-separated enough to trust rank canonicalization
+        # for (see canonicalize_shades) - matching then falls back to the
+        # raw template alone for that entry.
+        self._roi_groups: list[tuple[tuple[int, int, int, int], list[tuple[str, "cv2.Mat", "cv2.Mat | None", int]]]] = []
         self.update_rois(roi_templates)
 
     def update_rois(self, roi_templates) -> None:
@@ -30,12 +35,13 @@ class DetectionService(QObject):
         roi_groups = []
         for name, roi, template, section_index in roi_templates:
             resized = cv2.resize(template, (roi[2], roi[3]))
+            canonical = canonicalize_shades(resized)
             group = group_by_roi.get(roi)
             if group is None:
                 group = []
                 group_by_roi[roi] = group
                 roi_groups.append((roi, group))
-            group.append((name, resized, section_index))
+            group.append((name, resized, canonical, section_index))
         self._roi_groups = roi_groups
 
     def _active_section(self) -> int:
@@ -63,8 +69,8 @@ class DetectionService(QObject):
 
         for roi, entries in self._roi_groups:
             active = [
-                (name, template)
-                for name, template, section_index in entries
+                (name, template, canonical)
+                for name, template, canonical, section_index in entries
                 if section_index == section and name not in self._detected
             ]
             if not active:
@@ -77,10 +83,20 @@ class DetectionService(QObject):
                 continue
 
             crop_gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+            crop_canonical = canonicalize_shades(crop_gray)
+            crop_canonical_inverted = 255 - crop_canonical if crop_canonical is not None else None
 
-            for name, template in active:
+            for name, template, canonical in active:
                 result = cv2.matchTemplate(crop_gray, template, cv2.TM_CCOEFF_NORMED)
                 _, max_val, _, _ = cv2.minMaxLoc(result)
+
+                if canonical is not None:
+                    if crop_canonical is not None:
+                        result_c = cv2.matchTemplate(crop_canonical, canonical, cv2.TM_CCOEFF_NORMED)
+                        max_val = max(max_val, cv2.minMaxLoc(result_c)[1])
+                    if crop_canonical_inverted is not None:
+                        result_ci = cv2.matchTemplate(crop_canonical_inverted, canonical, cv2.TM_CCOEFF_NORMED)
+                        max_val = max(max_val, cv2.minMaxLoc(result_ci)[1])
 
                 if max_val > best_value:
                     best_value = max_val

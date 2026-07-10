@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import pytest
 
-from pokedex_counter.config import FRAME_SIZE, SPRITES_BG_DIR
+from pokedex_counter.config import FRAME_SIZE, SPRITES_BG_DIR, THRESHOLD
 from pokedex_counter.roi_config import build_detection_entries
 from pokedex_counter.services.detection_service import DetectionService
 from pokedex_counter.services.template_service import TemplateService
@@ -174,7 +174,7 @@ def test_update_rois_rebuilds_groups_without_touching_detected():
 
     assert "A" in detector._detected  # mid-run progress survives recalibration
     assert [roi for roi, _entries in detector._roi_groups] == [new_roi]
-    names_in_group = {name for name, _template, _section in detector._roi_groups[0][1]}
+    names_in_group = {name for name, _template, _canonical, _section in detector._roi_groups[0][1]}
     assert names_in_group == {"B"}
 
 
@@ -188,3 +188,83 @@ def test_update_rois_new_templates_are_matched_immediately():
     detector.process_frame(_frame_with_pattern_at(roi, _pattern(2)))
 
     assert detections == ["B"]
+
+
+def _shade_pattern(shade_grid, levels, size_scale=1):
+    levels_arr = np.array(levels, dtype=np.uint8)
+    img = levels_arr[shade_grid]
+    if size_scale > 1:
+        img = np.repeat(np.repeat(img, size_scale, axis=0), size_scale, axis=1)
+    return img
+
+
+# 20x20 grid (matching the ROI size used throughout these tests) using all 4
+# shade indices in a fixed pseudo-random spatial pattern - dense enough that
+# TM_CCOEFF_NORMED is actually sensitive to distortions between shades
+# (a handful of flat quadrants correlate too robustly to be a meaningful
+# test of anything other than a full inversion).
+_TEST_SHADE_GRID = np.random.RandomState(42).randint(0, 4, size=(20, 20))
+
+
+def test_negative_style_palette_still_detects_via_canonicalization():
+    """A GBC "Negative" palette fully reverses which shade is lightest vs
+    darkest. Raw grayscale matching can't recover from that (it scores
+    strongly negative for an inverted match), but the canonical+inverted
+    candidate in process_frame should."""
+    roi = (0, 0, 20, 20)
+    name = "A"
+    template = _shade_pattern(_TEST_SHADE_GRID, (0, 85, 170, 255))
+    live_crop = _shade_pattern(_TEST_SHADE_GRID, (255, 170, 85, 0))  # order reversed
+
+    # Prove the fix is load-bearing: the raw score alone must already be
+    # below threshold, or this test wouldn't be exercising the fix at all.
+    raw_score = cv2.minMaxLoc(cv2.matchTemplate(live_crop, template, cv2.TM_CCOEFF_NORMED))[1]
+    assert raw_score < THRESHOLD
+
+    detector = DetectionService([(name, roi, template, 0)])
+    detections = []
+    detector.detection.connect(detections.append)
+
+    detector.process_frame(_frame_with_pattern_at(roi, live_crop))
+
+    assert detections == [name]
+
+
+def test_low_contrast_palette_still_detects_via_canonicalization():
+    """A low-contrast palette can compress two shades to near-identical
+    luminance - a non-affine distortion relative to the template's even
+    spacing that TM_CCOEFF_NORMED's linear-invariance can't paper over on
+    the raw grayscale path, but rank canonicalization (which only cares
+    about relative order, not spacing) can."""
+    roi = (0, 0, 20, 20)
+    name = "A"
+    template = _shade_pattern(_TEST_SHADE_GRID, (0, 85, 170, 255))
+    live_crop = _shade_pattern(_TEST_SHADE_GRID, (0, 16, 32, 255))  # shades 1-3 compressed together
+
+    raw_score = cv2.minMaxLoc(cv2.matchTemplate(live_crop, template, cv2.TM_CCOEFF_NORMED))[1]
+    assert raw_score < THRESHOLD
+
+    detector = DetectionService([(name, roi, template, 0)])
+    detections = []
+    detector.detection.connect(detections.append)
+
+    detector.process_frame(_frame_with_pattern_at(roi, live_crop))
+
+    assert detections == [name]
+
+
+def test_flat_crop_does_not_spuriously_match_via_canonicalization():
+    """A blank/transition crop has no real 4-shade structure - canonicalize
+    _shades correctly returns None for it (see tests/vision), and
+    process_frame must not crash or fabricate a match when that happens."""
+    roi = (0, 0, 20, 20)
+    template = _shade_pattern(_TEST_SHADE_GRID, (0, 85, 170, 255))
+    flat_crop = np.full((20, 20), 128, dtype=np.uint8)
+
+    detector = DetectionService([("A", roi, template, 0)])
+    detections = []
+    detector.detection.connect(detections.append)
+
+    detector.process_frame(_frame_with_pattern_at(roi, flat_crop))
+
+    assert detections == []
