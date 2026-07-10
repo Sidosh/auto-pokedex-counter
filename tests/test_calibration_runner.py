@@ -29,14 +29,14 @@ def test_writable_roi_calibration_path_targets_exe_dir_when_frozen(monkeypatch, 
     assert path == tmp_path / "roi_calibration.py"
 
 
-def test_ensure_seeded_creates_file_with_default_roi_values(tmp_path):
+def test_ensure_seeded_creates_file_with_none_placeholders(tmp_path):
     config_path = tmp_path / "roi_calibration.py"
     calibration_runner._ensure_seeded(config_path)
 
     text = config_path.read_text()
-    assert f"ROI_CATCH = {calibration_runner._DEFAULT_ROI_CATCH}" in text
-    assert f"ROI_EVOLVE = {calibration_runner._DEFAULT_ROI_EVOLVE}" in text
-    assert f"ROI_TEXT = {calibration_runner._DEFAULT_ROI_TEXT}" in text
+    assert "ROI_CATCH = None" in text
+    assert "ROI_EVOLVE = None" in text
+    assert "ROI_TEXT = None" in text
 
 
 def test_ensure_seeded_leaves_existing_file_untouched(tmp_path):

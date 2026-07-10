@@ -9,15 +9,15 @@ from pokedex_counter.services.calibration_service import CalibrationService
 
 _FILENAMES = {"CATCH": "catch.png", "EVOLVE": "evolve.png", "TEXT": "text.png"}
 
-_SEED_TEMPLATE = """ROI_CATCH = {catch}
-ROI_EVOLVE = {evolve}
-ROI_TEXT = {text}
+# None means "not calibrated yet" - roi_config.py skips any entry whose
+# type has no locked position, and app.py shows a calibration prompt
+# instead of running detection until at least one is locked. This seed
+# only needs to exist so roi_writer's regex has `NAME = ...` lines to find
+# and replace on the first-ever calibration; the file is otherwise blank.
+_SEED_TEMPLATE = """ROI_CATCH = None
+ROI_EVOLVE = None
+ROI_TEXT = None
 """
-
-
-_DEFAULT_ROI_CATCH = (383, 35, 127, 127)
-_DEFAULT_ROI_EVOLVE = (275, 54, 126, 126)
-_DEFAULT_ROI_TEXT = (367, 273, 140, 50)
 
 
 def _writable_roi_calibration_path() -> Path:
@@ -40,9 +40,7 @@ def _ensure_seeded(config_path: Path) -> None:
     if config_path.exists():
         return
 
-    config_path.write_text(_SEED_TEMPLATE.format(
-        catch=_DEFAULT_ROI_CATCH, evolve=_DEFAULT_ROI_EVOLVE, text=_DEFAULT_ROI_TEXT
-    ))
+    config_path.write_text(_SEED_TEMPLATE)
 
 
 def run_calibration(camera_index=2) -> dict[str, tuple[int, int, int, int]]:

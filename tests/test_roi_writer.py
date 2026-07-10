@@ -60,6 +60,19 @@ def test_partial_lock_only_updates_given_keys(config_file):
     assert "ROI_TEXT = (335, 226, 111, 40)" in text  # untouched
 
 
+def test_replaces_none_placeholder_on_first_calibration(tmp_path):
+    path = tmp_path / "roi_calibration.py"
+    path.write_text("ROI_CATCH = None\nROI_EVOLVE = None\nROI_TEXT = None\n")
+
+    updated = update_roi_constants(path, {"CATCH": (1, 2, 3, 4)})
+
+    assert updated == ["ROI_CATCH"]
+    text = path.read_text()
+    assert "ROI_CATCH = (1, 2, 3, 4)" in text
+    assert "ROI_EVOLVE = None" in text  # untouched
+    assert "ROI_TEXT = None" in text  # untouched
+
+
 def test_unknown_constant_name_is_skipped_not_crashed(config_file):
     updated = update_roi_constants(config_file, {"NOT_A_REAL_KEY": (1, 2, 3, 4)})
 

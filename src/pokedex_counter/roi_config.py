@@ -1,26 +1,18 @@
-from pathlib import Path
-
 # ROI_CATCH/ROI_EVOLVE/ROI_TEXT live in roi_calibration.py, a sibling module
 # that's gitignored (see .gitignore) rather than committed - it holds this
 # machine's camera calibration, which is personal/local and shouldn't show
 # up as a diff every time this app is recalibrated. calibration_runner.py's
 # run_calibration() rewrites that file in place via roi_writer.py.
 #
-# A fresh checkout won't have it yet - seed it with sane defaults the first
-# time the import fails, then retry. When frozen, roi_calibration.py is
-# baked into the PyInstaller bundle (it exists on disk at build time) and
-# the import always succeeds, so this fallback only ever runs for a
-# from-source checkout that's never been calibrated.
+# There are deliberately no default/fallback coordinates: a fresh checkout
+# (or any ROI that's never been locked) has no idea where these boxes are
+# on this player's specific capture setup, so guessing would just produce
+# confident-looking nonsense. None means "not calibrated yet" - app.py
+# shows a calibration prompt instead of running detection until it isn't.
 try:
     from pokedex_counter.roi_calibration import ROI_CATCH, ROI_EVOLVE, ROI_TEXT
 except ImportError:
-    _CALIBRATION_PATH = Path(__file__).resolve().parent / "roi_calibration.py"
-    _CALIBRATION_PATH.write_text(
-        "ROI_CATCH = (383, 35, 127, 127)\n"
-        "ROI_EVOLVE = (275, 54, 126, 126)\n"
-        "ROI_TEXT = (367, 273, 140, 50)\n"
-    )
-    from pokedex_counter.roi_calibration import ROI_CATCH, ROI_EVOLVE, ROI_TEXT
+    ROI_CATCH = ROI_EVOLVE = ROI_TEXT = None
 
 # Dex numbers whose "obtained" event is only ever confirmed via a name-text
 # banner (trade evolutions etc.) rather than a sprite match against
@@ -106,7 +98,8 @@ def build_detection_entries(templates: dict, locked: dict[str, tuple[int, int, i
     """Build (name, roi, template, section_index) quadruples from
     CATCH_SECTIONS, substituting freshly calibrated boxes (as returned by
     run_calibration) for ROI_CATCH/ROI_EVOLVE/ROI_TEXT in-memory for
-    this session.
+    this session. Entries whose roi type has no calibrated position yet
+    (still None) are skipped entirely - there's nowhere to look for them.
 
     run_calibration() persists locked ROIs back into this file on a
     best-effort basis (e.g. it can't when frozen into an exe), but this app
@@ -123,4 +116,5 @@ def build_detection_entries(templates: dict, locked: dict[str, tuple[int, int, i
         (name, effective[roi_label], templates[name], section_index)
         for section_index, section in enumerate(CATCH_SECTIONS)
         for name, roi_label in section
+        if effective[roi_label] is not None
     ]

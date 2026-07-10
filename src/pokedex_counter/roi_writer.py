@@ -16,7 +16,10 @@ def update_roi_constants(config_path: Path, locked: dict[str, tuple[int, int, in
             continue
 
         expected = tuple(box)
-        pattern = re.compile(rf"^{const_name}\s*=\s*\([^)]*\)", re.MULTILINE)
+        # Matches either a real tuple (already-calibrated value being
+        # updated again) or the literal `None` placeholder written for an
+        # entry that hasn't been calibrated yet (see roi_config.py).
+        pattern = re.compile(rf"^{const_name}\s*=\s*(?:\([^)]*\)|None)", re.MULTILINE)
         replacement = f"{const_name} = {expected}"
 
         new_text, count = pattern.subn(replacement, text)

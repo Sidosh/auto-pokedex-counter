@@ -34,6 +34,7 @@ def run() -> int:
     # --- UI ---
     window = MainWindow()
     settings = SettingsWindow()
+    window.set_calibrated(bool(roi_templates))
 
     # --- persisted settings ---
     prefs = QSettings(ORGANIZATION_NAME, APP_NAME)
@@ -61,7 +62,9 @@ def run() -> int:
         capture.stop()
         locked = run_calibration(camera_index=camera_index)
         if locked:
-            detector.update_rois(build_detection_entries(templates, locked))
+            new_roi_templates = build_detection_entries(templates, locked)
+            detector.update_rois(new_roi_templates)
+            window.set_calibrated(bool(new_roi_templates))
         capture = CaptureService(camera_index=camera_index)
         capture.frame_ready.connect(detector.process_frame, Qt.ConnectionType.DirectConnection)
         capture.start()
