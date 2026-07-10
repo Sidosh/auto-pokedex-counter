@@ -15,28 +15,34 @@ ROI_TEXT = {text}
 """
 
 
-def _writable_roi_config_path() -> Path:
+_DEFAULT_ROI_CATCH = (383, 35, 127, 127)
+_DEFAULT_ROI_EVOLVE = (275, 54, 126, 126)
+_DEFAULT_ROI_TEXT = (367, 273, 140, 50)
+
+
+def _writable_roi_calibration_path() -> Path:
     """Where calibration persists locked ROIs for next launch.
 
-    Source/dev runs write straight into the package's roi_config.py (the
-    file `from pokedex_counter.roi_config import ...` reads). A frozen exe
-    has no such writable file — its modules are baked into the bundle — so
-    it gets its own roi_config.py next to the executable instead. Either
-    way, run_calibration() also returns the locked ROIs so the current
-    run doesn't depend on this write (or a re-import) succeeding.
+    Source/dev runs write straight into the package's roi_calibration.py
+    (the gitignored file `roi_config.py` imports ROI_CATCH/EVOLVE/TEXT
+    from). A frozen exe has no such writable file — its modules are baked
+    into the bundle — so it gets its own roi_calibration.py next to the
+    executable instead. Either way, run_calibration() also returns the
+    locked ROIs so the current run doesn't depend on this write (or a
+    re-import) succeeding.
     """
     if getattr(sys, "frozen", False):
-        return Path(sys.executable).resolve().parent / "roi_config.py"
-    return Path(__file__).resolve().parent / "roi_config.py"
+        return Path(sys.executable).resolve().parent / "roi_calibration.py"
+    return Path(__file__).resolve().parent / "roi_calibration.py"
 
 
 def _ensure_seeded(config_path: Path) -> None:
     if config_path.exists():
         return
 
-    from pokedex_counter.roi_config import ROI_CATCH, ROI_EVOLVE, ROI_TEXT
-
-    config_path.write_text(_SEED_TEMPLATE.format(catch=ROI_CATCH, evolve=ROI_EVOLVE, text=ROI_TEXT))
+    config_path.write_text(_SEED_TEMPLATE.format(
+        catch=_DEFAULT_ROI_CATCH, evolve=_DEFAULT_ROI_EVOLVE, text=_DEFAULT_ROI_TEXT
+    ))
 
 
 def run_calibration(camera_index=2) -> dict[str, tuple[int, int, int, int]]:
@@ -62,7 +68,7 @@ def run_calibration(camera_index=2) -> dict[str, tuple[int, int, int, int]]:
         print("[Calibration] Nothing locked, using existing ROI_* values.")
         return {}
 
-    config_path = _writable_roi_config_path()
+    config_path = _writable_roi_calibration_path()
     try:
         _ensure_seeded(config_path)
         updated = update_roi_constants(config_path, locked)

@@ -1,6 +1,26 @@
-ROI_CATCH = (383, 35, 127, 127)
-ROI_EVOLVE = (275, 54, 126, 126)
-ROI_TEXT = (367, 273, 142, 51)
+from pathlib import Path
+
+# ROI_CATCH/ROI_EVOLVE/ROI_TEXT live in roi_calibration.py, a sibling module
+# that's gitignored (see .gitignore) rather than committed - it holds this
+# machine's camera calibration, which is personal/local and shouldn't show
+# up as a diff every time this app is recalibrated. calibration_runner.py's
+# run_calibration() rewrites that file in place via roi_writer.py.
+#
+# A fresh checkout won't have it yet - seed it with sane defaults the first
+# time the import fails, then retry. When frozen, roi_calibration.py is
+# baked into the PyInstaller bundle (it exists on disk at build time) and
+# the import always succeeds, so this fallback only ever runs for a
+# from-source checkout that's never been calibrated.
+try:
+    from pokedex_counter.roi_calibration import ROI_CATCH, ROI_EVOLVE, ROI_TEXT
+except ImportError:
+    _CALIBRATION_PATH = Path(__file__).resolve().parent / "roi_calibration.py"
+    _CALIBRATION_PATH.write_text(
+        "ROI_CATCH = (383, 35, 127, 127)\n"
+        "ROI_EVOLVE = (275, 54, 126, 126)\n"
+        "ROI_TEXT = (367, 273, 140, 50)\n"
+    )
+    from pokedex_counter.roi_calibration import ROI_CATCH, ROI_EVOLVE, ROI_TEXT
 
 # Dex numbers whose "obtained" event is only ever confirmed via a name-text
 # banner (trade evolutions etc.) rather than a sprite match against

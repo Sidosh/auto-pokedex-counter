@@ -13,3 +13,4 @@ dist/
 /debug
 /screenshots
 /.vscode
+/src/pokedex_counter/roi_calibration.py
