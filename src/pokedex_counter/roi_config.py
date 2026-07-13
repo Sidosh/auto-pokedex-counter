@@ -17,7 +17,7 @@ except ImportError:
 # Dex numbers whose "obtained" event is only ever confirmed via a name-text
 # banner (trade evolutions etc.) rather than a sprite match against
 # ROI_CATCH/ROI_EVOLVE.
-TEXT_NAMES = {"33", "35", "63", "127", "131", "133", "137", "138", "142", "147"}
+TEXT_NAMES = {"33", "35", "63", "106", "127", "131", "133", "137", "138", "142", "147"}
 
 # Dex numbers that have an ROI_EVOLVE screen event (something evolves into
 # them). Used to sweep any evolution not explicitly routed into a section
