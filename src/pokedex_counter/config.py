@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 APP_NAME = "Pokedex Counter"
-APP_VERSION = "0.3.0"
+APP_VERSION = "0.3.1"
 ORGANIZATION_NAME = "MyOrg"
 
 # When frozen by PyInstaller, data files added via --add-data are extracted
