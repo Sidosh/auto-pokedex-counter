@@ -16,6 +16,8 @@ class ClickableLabel(QLabel):
         super().__init__(parent)
         self._path = path
         self._selected = False
+        self._wr_marked = False
+        self._catch_color = "black"
         self.setStyleSheet(self.BASE_STYLE)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
 
@@ -26,14 +28,17 @@ class ClickableLabel(QLabel):
 
     def toggle_selected(self) -> None:
         self._selected = not self._selected
+        if self._selected:
+            self._catch_color = "black"
         self._apply_style()
         self.clicked.emit(self._path)
 
-    def select(self) -> None:
+    def select(self, color: str = "black") -> None:
         """Programmatically select (idempotent - no-op if already selected)."""
         if self._selected:
             return
         self._selected = True
+        self._catch_color = color
         self._apply_style()
         self.clicked.emit(self._path)
 
@@ -42,11 +47,23 @@ class ClickableLabel(QLabel):
         if not self._selected:
             return
         self._selected = False
+        self._catch_color = "black"
         self._apply_style()
         self.clicked.emit(self._path)
 
+    def set_wr_marked(self, marked: bool) -> None:
+        """Toggle the pre-catch "on WR route" highlight. Purely visual -
+        _apply_style favors the catch color over this once selected, so
+        catching a marked sprite doesn't need a separate unmark step."""
+        if self._wr_marked == marked:
+            return
+        self._wr_marked = marked
+        self._apply_style()
+
     def _apply_style(self) -> None:
         if self._selected:
-            self.setStyleSheet(self.BASE_STYLE + "background-color: black;")
+            self.setStyleSheet(self.BASE_STYLE + f"background-color: {self._catch_color};")
+        elif self._wr_marked:
+            self.setStyleSheet(self.BASE_STYLE + "background-color: red;")
         else:
             self.setStyleSheet(self.BASE_STYLE)

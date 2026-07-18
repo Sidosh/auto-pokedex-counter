@@ -10,6 +10,7 @@ from pokedex_counter.vision.template_matching import canonicalize_shades
 class DetectionService(QObject):
     detection = Signal(str)
     debug_scores = Signal(str, float)
+    section_changed = Signal(int)
 
     def __init__(self, roi_templates, threshold=THRESHOLD, debug=False):
         super().__init__()
@@ -17,6 +18,7 @@ class DetectionService(QObject):
         self.debug = debug
         self._detected: set[str] = set()
         self._section_triggers = SECTION_TRIGGERS
+        self._last_section = 0
 
         # roi -> [(name, resized_template, canonical_template, section_index), ...],
         # grouped so each distinct screen region is cropped/converted only
@@ -55,11 +57,20 @@ class DetectionService(QObject):
             section += 1
         return section
 
+    def current_section(self) -> int:
+        """Public accessor for the currently active section (see
+        _active_section)."""
+        return self._active_section()
+
     def process_frame(self, frame):
         frame = cv2.flip(frame, 1)
         frame = cv2.resize(frame, FRAME_SIZE)
 
         section = self._active_section()
+
+        if section != self._last_section:
+            self._last_section = section
+            self.section_changed.emit(section)
 
         if self.debug:
             print(f"[section] active={section}")

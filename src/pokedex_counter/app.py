@@ -10,6 +10,7 @@ from pokedex_counter.main_window import MainWindow
 from pokedex_counter.services.capture_service import CaptureService
 from pokedex_counter.services.detection_service import DetectionService
 from pokedex_counter.services.template_service import TemplateService
+from pokedex_counter.services.wr_service import load_wr_sections
 from pokedex_counter.settings_window import SettingsWindow
 
 
@@ -45,6 +46,22 @@ def run() -> int:
     settings.font_size_spinbox.valueChanged.connect(lambda v: prefs.setValue("counter_font_size", v))
     settings.compare_to_wr_checkbox.toggled.connect(lambda checked: prefs.setValue("compare_to_wr", checked))
 
+    # --- WR (world record) comparison ---
+    wr_sections = load_wr_sections()
+
+    def apply_wr_section(section_index: int) -> None:
+        if settings.compare_to_wr_checkbox.isChecked():
+            window.sprite_strip.mark_wr_section(wr_sections.get(section_index, set()))
+
+    def on_compare_to_wr_toggled(checked: bool) -> None:
+        if checked:
+            apply_wr_section(detector.current_section())
+        else:
+            window.sprite_strip.clear_wr_marks()
+
+    detector.section_changed.connect(apply_wr_section)
+    settings.compare_to_wr_checkbox.toggled.connect(on_compare_to_wr_toggled)
+
     # --- WIRING (VERY IMPORTANT) ---
 
     capture.frame_ready.connect(detector.process_frame, Qt.ConnectionType.DirectConnection)
@@ -76,6 +93,8 @@ def run() -> int:
     # --- start ---
     window.set_sprites_per_row(settings.columns_spinbox.value())
     window.set_counter_font_size(settings.font_size_spinbox.value())
+    if settings.compare_to_wr_checkbox.isChecked():
+        apply_wr_section(detector.current_section())
     capture.start()
     window.show()
     settings.move(window.x() + window.frameGeometry().width() + 10, window.y())

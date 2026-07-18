@@ -28,6 +28,8 @@ class SpriteStrip(QWidget):
         self._sprite_size = sprite_size
         self._count = 0
         self._labels_by_name: dict[str, ClickableLabel] = {}
+        self._wr_enabled = False
+        self._wr_names: set[str] = set()
 
         self._layout = FlowLayout(self)
 
@@ -100,7 +102,11 @@ class SpriteStrip(QWidget):
         if label is None:
             return False
 
-        label.select()
+        if self._wr_enabled:
+            color = "black" if name in self._wr_names else "blue"
+        else:
+            color = "black"
+        label.select(color)
         return True
 
     def deselect_sprite(self, name: str) -> bool:
@@ -110,6 +116,23 @@ class SpriteStrip(QWidget):
 
         label.deselect()
         return True
+
+    def mark_wr_section(self, names: set[str]) -> None:
+        """Highlight `names` (the current WR section's dex numbers) red, and
+        remember them so the next catches are colored black (on-route) or
+        blue (off-route) accordingly."""
+        self._wr_enabled = True
+        self._wr_names = set(names)
+        for name, label in self._labels_by_name.items():
+            label.set_wr_marked(name in self._wr_names)
+
+    def clear_wr_marks(self) -> None:
+        """Turn off WR comparison: no more red highlighting, and catches go
+        back to the default black."""
+        self._wr_enabled = False
+        self._wr_names = set()
+        for label in self._labels_by_name.values():
+            label.set_wr_marked(False)
 
     def reset(self) -> None:
         """Deselect every sprite, going through the same per-sprite deselect
