@@ -7,7 +7,7 @@ DetectionService/CaptureService. All cross-object wiring happens in
 app.py, matching the existing convention there.
 """
 
-from PySide6.QtWidgets import QFormLayout, QPushButton, QSpinBox, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QCheckBox, QFormLayout, QPushButton, QSpinBox, QVBoxLayout, QWidget
 
 DEFAULT_SPRITES_PER_ROW = 10
 DEFAULT_FONT_SIZE = 24
@@ -30,6 +30,9 @@ class SettingsWindow(QWidget):
         self.font_size_spinbox.setRange(8, 96)
         self.font_size_spinbox.setValue(DEFAULT_FONT_SIZE)
         form.addRow("Counter font size:", self.font_size_spinbox)
+
+        self.compare_to_wr_checkbox = QCheckBox()
+        form.addRow("Compare to WR?", self.compare_to_wr_checkbox)
 
         layout.addLayout(form)
 

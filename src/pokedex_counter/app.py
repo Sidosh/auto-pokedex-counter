@@ -40,8 +40,10 @@ def run() -> int:
     prefs = QSettings(ORGANIZATION_NAME, APP_NAME)
     settings.columns_spinbox.setValue(int(prefs.value("sprites_per_row", settings.columns_spinbox.value())))
     settings.font_size_spinbox.setValue(int(prefs.value("counter_font_size", settings.font_size_spinbox.value())))
+    settings.compare_to_wr_checkbox.setChecked(prefs.value("compare_to_wr", settings.compare_to_wr_checkbox.isChecked(), type=bool))
     settings.columns_spinbox.valueChanged.connect(lambda v: prefs.setValue("sprites_per_row", v))
     settings.font_size_spinbox.valueChanged.connect(lambda v: prefs.setValue("counter_font_size", v))
+    settings.compare_to_wr_checkbox.toggled.connect(lambda checked: prefs.setValue("compare_to_wr", checked))
 
     # --- WIRING (VERY IMPORTANT) ---
 
