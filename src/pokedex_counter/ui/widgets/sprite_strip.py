@@ -118,13 +118,17 @@ class SpriteStrip(QWidget):
         return True
 
     def mark_wr_section(self, names: set[str]) -> None:
-        """Highlight `names` (the current WR section's dex numbers) red, and
-        remember them so the next catches are colored black (on-route) or
-        blue (off-route) accordingly."""
+        """Highlight `names` red, on top of whatever's already marked from
+        earlier sections - a WR pokemon missed in its own section stays
+        flagged instead of silently losing its highlight once the run moves
+        past it. Also remembers them so future catches are colored black
+        (on-route, whenever caught) or blue (never on-route)."""
         self._wr_enabled = True
-        self._wr_names = set(names)
-        for name, label in self._labels_by_name.items():
-            label.set_wr_marked(name in self._wr_names)
+        self._wr_names |= set(names)
+        for name in names:
+            label = self._labels_by_name.get(name)
+            if label is not None:
+                label.set_wr_marked(True)
 
     def clear_wr_marks(self) -> None:
         """Turn off WR comparison: no more red highlighting, and catches go
@@ -137,9 +141,14 @@ class SpriteStrip(QWidget):
     def reset(self) -> None:
         """Deselect every sprite, going through the same per-sprite deselect
         path a manual un-click takes so count/controller/detector state all
-        stay consistent."""
+        stay consistent. Also drops any accumulated WR marks - since those
+        now persist across sections (see mark_wr_section), a fresh run
+        needs to re-earn them section by section rather than starting with
+        every section the previous run ever reached still lit up red."""
         for name in self._labels_by_name:
             self.deselect_sprite(name)
+        if self._wr_enabled:
+            self.clear_wr_marks()
 
     def caught_count(self) -> int:
         return self._count

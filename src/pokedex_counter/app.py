@@ -54,9 +54,17 @@ def run() -> int:
         if settings.compare_to_wr_checkbox.isChecked():
             window.sprite_strip.mark_wr_section(wr_sections.get(section_index, set()))
 
+    def apply_wr_up_to_current() -> None:
+        """Backfill every section's marks up to the active one - not just
+        the current one - so re-enabling mid-run (or starting up already
+        past section 0) still flags every WR pokemon missed so far, not
+        only ones from here on."""
+        for section_index in range(detector.current_section() + 1):
+            apply_wr_section(section_index)
+
     def on_compare_to_wr_toggled(checked: bool) -> None:
         if checked:
-            apply_wr_section(detector.current_section())
+            apply_wr_up_to_current()
         else:
             window.sprite_strip.clear_wr_marks()
 
@@ -117,7 +125,7 @@ def run() -> int:
     window.set_sprites_per_row(settings.columns_spinbox.value())
     window.set_counter_font_size(settings.font_size_spinbox.value())
     if settings.compare_to_wr_checkbox.isChecked():
-        apply_wr_section(detector.current_section())
+        apply_wr_up_to_current()
     capture.start()
     window.show()
     settings.move(window.x() + window.frameGeometry().width() + 10, window.y())
