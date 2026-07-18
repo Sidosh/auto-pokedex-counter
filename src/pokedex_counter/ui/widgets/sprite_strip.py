@@ -141,6 +141,9 @@ class SpriteStrip(QWidget):
         for name in self._labels_by_name:
             self.deselect_sprite(name)
 
+    def caught_count(self) -> int:
+        return self._count
+
     def set_columns(self, columns: int) -> None:
         self._layout.set_columns(columns)
 

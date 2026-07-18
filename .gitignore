@@ -14,3 +14,4 @@ dist/
 /screenshots
 /.vscode
 /src/pokedex_counter/roi_calibration.py
+/src/pokedex_counter/resources/comparison/PB.json

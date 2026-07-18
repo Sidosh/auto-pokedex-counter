@@ -1,5 +1,5 @@
 from pathlib import Path
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QMessageBox
 from PySide6.QtCore import Qt, QSettings
 
 from pokedex_counter.calibration_runner import run_calibration
@@ -9,6 +9,7 @@ from pokedex_counter.controllers.game_controller import GameController
 from pokedex_counter.main_window import MainWindow
 from pokedex_counter.services.capture_service import CaptureService
 from pokedex_counter.services.detection_service import DetectionService
+from pokedex_counter.services.pb_service import save_pb
 from pokedex_counter.services.template_service import TemplateService
 from pokedex_counter.services.wr_service import load_wr_sections
 from pokedex_counter.settings_window import SettingsWindow
@@ -66,6 +67,7 @@ def run() -> int:
 
     capture.frame_ready.connect(detector.process_frame, Qt.ConnectionType.DirectConnection)
     detector.detection.connect(controller.on_detection)
+    detector.section_changed.connect(controller.on_section_changed)
 
     controller.pokemon_found.connect(window.sprite_strip.select_sprite)
     window.sprite_strip.sprite_deselected.connect(controller.forget)
@@ -74,7 +76,28 @@ def run() -> int:
 
     settings.columns_spinbox.valueChanged.connect(window.set_sprites_per_row)
     settings.font_size_spinbox.valueChanged.connect(window.set_counter_font_size)
-    settings.reset_button.clicked.connect(window.sprite_strip.reset)
+
+    def maybe_prompt_save_pb() -> None:
+        """If the current run has the full 151, ask whether to save it as
+        PB.json before its progress is lost (reset or app close)."""
+        if window.sprite_strip.caught_count() != 151:
+            return
+
+        reply = QMessageBox.question(
+            window,
+            "Save Personal Best?",
+            "You've caught all 151 Pokémon! Save this run as your PB?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            save_pb(controller.section_catches)
+
+    def on_reset_clicked() -> None:
+        maybe_prompt_save_pb()
+        window.sprite_strip.reset()
+
+    settings.reset_button.clicked.connect(on_reset_clicked)
+    app.aboutToQuit.connect(maybe_prompt_save_pb)
 
     def on_calibrate_clicked() -> None:
         nonlocal capture

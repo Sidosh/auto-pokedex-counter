@@ -22,6 +22,18 @@ FONTS_DIR = RESOURCES_DIR / "fonts"
 COMPARISON_DIR = RESOURCES_DIR / "comparison"
 WR_JSON_PATH = COMPARISON_DIR / "WR.json"
 
+# Where a completed run's per-section catch order is saved (see
+# services/pb_service.py). Unlike WR_JSON_PATH (a bundled read-only
+# reference), this is user-generated - and when frozen, _PACKAGE_DIR points
+# at PyInstaller's ephemeral extraction dir (sys._MEIPASS), which vanishes
+# when the process exits. This mirrors calibration_runner.py's writable-path
+# split for roi_calibration.py: next to the executable when frozen, next to
+# the comparison resources when running from source.
+if getattr(sys, "frozen", False):
+    PB_JSON_PATH = Path(sys.executable).resolve().parent / "comparison" / "PB.json"
+else:
+    PB_JSON_PATH = COMPARISON_DIR / "PB.json"
+
 THRESHOLD = 0.85
 
 # Minimum gap (0-255 grayscale units) required between adjacent k-means
