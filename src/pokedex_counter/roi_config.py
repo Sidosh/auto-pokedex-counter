@@ -52,13 +52,14 @@ CATCH_SECTIONS_RAW: list[list[str]] = [
     ["25", "81", "26", "100", "145", "83", "106", "7"],
     ["33", "35", "63", "127", "137", "147", "69", "56", "2", "131", "13"],
     ["138", "142", "133", "124", "132", "52", "77", "88", "89", "110", "125",
-     "60", "79", "108"],
+     "60", "79", "108", "93", "24", "64", "34", "36", "148"],
 ]
 
 # Within these sections, these dex numbers refer to their ROI_EVOLVE event
 # rather than the default CATCH/TEXT one.
 SECTION_EVOLVE_OVERRIDES: dict[int, set[str]] = {
     7: {"30", "31", "47", "103"},  # section 8 (0-indexed 7)
+    10: {"148", "93", "24", "64", "34", "36"},  # section 11 (0-indexed 10)
 }
 
 # The dex number whose detection advances to the next section. The final
