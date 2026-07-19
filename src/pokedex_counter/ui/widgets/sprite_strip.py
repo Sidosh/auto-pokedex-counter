@@ -122,13 +122,21 @@ class SpriteStrip(QWidget):
         earlier sections - a WR pokemon missed in its own section stays
         flagged instead of silently losing its highlight once the run moves
         past it. Also remembers them so future catches are colored black
-        (on-route, whenever caught) or blue (never on-route)."""
+        (on-route, whenever caught) or blue (never on-route).
+
+        If one of `names` was already caught before its section came up
+        (so it was colored blue as apparently off-route at the time),
+        correct it to black now that this section confirms it's on-route
+        after all."""
         self._wr_enabled = True
         self._wr_names |= set(names)
         for name in names:
             label = self._labels_by_name.get(name)
-            if label is not None:
-                label.set_wr_marked(True)
+            if label is None:
+                continue
+            label.set_wr_marked(True)
+            if label._selected:
+                label.set_catch_color("black")
 
     def clear_wr_marks(self) -> None:
         """Turn off WR comparison: no more red highlighting, and catches go

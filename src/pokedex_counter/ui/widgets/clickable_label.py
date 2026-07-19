@@ -60,6 +60,18 @@ class ClickableLabel(QLabel):
         self._wr_marked = marked
         self._apply_style()
 
+    def set_catch_color(self, color: str) -> None:
+        """Retroactively correct an already-caught sprite's color - e.g. it
+        was caught out of order (before its WR section started, so it was
+        colored blue as off-route), and a later section reveals it was
+        actually on-route all along. No-op while unselected; doesn't emit
+        `clicked` since this isn't a new catch event."""
+        if self._catch_color == color:
+            return
+        self._catch_color = color
+        if self._selected:
+            self._apply_style()
+
     def _apply_style(self) -> None:
         if self._selected:
             self.setStyleSheet(self.BASE_STYLE + f"background-color: {self._catch_color};")
