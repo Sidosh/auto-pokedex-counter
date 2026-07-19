@@ -17,18 +17,18 @@ DETECTION_FIXTURES_DIR = Path(__file__).parent.parent / "fixtures" / "detection"
 # _prime_to_section below.
 DETECTION_CASES = [
     ("calibration_01.png", "catch", "catch_01.png", "97", 1),
-    ("calibration_01.png", "evolve", "evolve_01.png", "80", 10),
+    ("calibration_01.png", "evolve", "evolve_01.png", "80", 11),
     ("calibration_01.png", "text", "text_01.png", "35", 9),
     ("calibration_02.png", "catch", "catch_02.png", "97", 1),
-    ("calibration_02.png", "evolve", "evolve_02.png", "80", 10),
+    ("calibration_02.png", "evolve", "evolve_02.png", "80", 11),
     ("calibration_02.png", "text", "text_02.png", "35", 9),
     # Real captures of the same screens under a different (non-default) GBC
     # hardware palette and under a fully inverted ("Negative"-style) one -
     # regression coverage for canonicalize_shades()/the ROI search margin.
     ("calibration_01.png", "catch", "catch_01_palette.png", "97", 1),
     ("calibration_01.png", "catch", "catch_01_inverted.png", "97", 1),
-    ("calibration_01.png", "evolve", "evolve_01_palette.png", "80", 10),
-    ("calibration_01.png", "evolve", "evolve_01_inverted.png", "80", 10),
+    ("calibration_01.png", "evolve", "evolve_01_palette.png", "80", 11),
+    ("calibration_01.png", "evolve", "evolve_01_inverted.png", "80", 11),
     ("calibration_01.png", "text", "text_01_palette.png", "35", 9),
     ("calibration_01.png", "text", "text_01_inverted.png", "35", 9),
 ]

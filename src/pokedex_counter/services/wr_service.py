@@ -8,11 +8,9 @@ def load_wr_sections() -> dict[int, set[str]]:
     route" for that section, per WR.json. Missing/unreadable file means the
     feature is quietly unavailable (compare_to_wr just has nothing to mark).
 
-    WR.json splits the endgame across keys "10" and "11", but
-    DetectionService's last section (index 10) absorbs everything after the
-    last trigger and never advances further - so "10" and "11" are merged
-    into index 10 here to match.
-    """
+    WR.json's keys already line up 1:1 with DetectionService's section
+    indices, including the dedicated evolution section at the end (see
+    roi_config.py's CATCH_SECTIONS_RAW)."""
     if not WR_JSON_PATH.is_file():
         return {}
 
@@ -23,9 +21,4 @@ def load_wr_sections() -> dict[int, set[str]]:
         print(f"[wr_service] WARNING: failed to load '{WR_JSON_PATH}', compare-to-WR disabled: {e}")
         return {}
 
-    sections: dict[int, set[str]] = {}
-    for key, names in raw.items():
-        index = min(int(key), 10)
-        sections.setdefault(index, set()).update(names)
-
-    return sections
+    return {int(key): set(names) for key, names in raw.items()}

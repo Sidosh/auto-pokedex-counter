@@ -53,6 +53,9 @@ CATCH_SECTIONS_RAW: list[list[str]] = [
     ["33", "35", "63", "127", "137", "147", "69", "56", "2", "131", "13"],
     ["138", "142", "133", "124", "132", "52", "77", "88", "89", "110", "125",
      "60", "79", "108", "93", "24", "64", "34", "36", "148"],
+    ["93", "24", "64", "34", "36"],  # dedicated evolution section - these
+    # five repeat from the section above (still catchable there too); the
+    # rest is filled in by build_catch_sections()'s sweep
 ]
 
 # Within these sections, these dex numbers refer to their ROI_EVOLVE event
@@ -60,6 +63,7 @@ CATCH_SECTIONS_RAW: list[list[str]] = [
 SECTION_EVOLVE_OVERRIDES: dict[int, set[str]] = {
     7: {"30", "31", "47", "103"},  # section 8 (0-indexed 7)
     10: {"148", "93", "24", "64", "34", "36"},  # section 11 (0-indexed 10)
+    11: {"93", "24", "64", "34", "36"},  # dedicated evolution section - same five, listed again here
 }
 
 # The dex number whose detection advances to the next section. The final
