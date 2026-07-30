@@ -15,10 +15,26 @@ from pokedex_counter.services.wr_service import load_wr_sections
 from pokedex_counter.settings_window import SettingsWindow
 
 
+def wire_bonus_highlight(settings: SettingsWindow, sprite_strip, bonuses: set[str]) -> None:
+    """Point the "Highlight bonuses" checkbox at the sprite strip, and apply
+    whatever state the checkbox was restored in.
+
+    Unlike the WR marks there's nothing to re-apply per section or after a
+    reset: `bonuses` is a static list, so the strip only ever needs to know
+    whether the setting is on. Lives out here (rather than inline in run()
+    like the WR wiring) purely so it can be tested without standing up a
+    camera and the whole app."""
+    def apply(checked: bool) -> None:
+        sprite_strip.set_bonus_names(bonuses if checked else set())
+
+    settings.highlight_bonuses_checkbox.toggled.connect(apply)
+    apply(settings.highlight_bonuses_checkbox.isChecked())
+
+
 def run() -> int:
     camera_index = resolve_camera_index()
 
-    from pokedex_counter.roi_config import build_detection_entries
+    from pokedex_counter.roi_config import BONUSES, build_detection_entries
 
     app = QApplication([])
 
@@ -43,9 +59,11 @@ def run() -> int:
     settings.columns_spinbox.setValue(int(prefs.value("sprites_per_row", settings.columns_spinbox.value())))
     settings.font_size_spinbox.setValue(int(prefs.value("counter_font_size", settings.font_size_spinbox.value())))
     settings.compare_to_wr_checkbox.setChecked(prefs.value("compare_to_wr", settings.compare_to_wr_checkbox.isChecked(), type=bool))
+    settings.highlight_bonuses_checkbox.setChecked(prefs.value("highlight_bonuses", settings.highlight_bonuses_checkbox.isChecked(), type=bool))
     settings.columns_spinbox.valueChanged.connect(lambda v: prefs.setValue("sprites_per_row", v))
     settings.font_size_spinbox.valueChanged.connect(lambda v: prefs.setValue("counter_font_size", v))
     settings.compare_to_wr_checkbox.toggled.connect(lambda checked: prefs.setValue("compare_to_wr", checked))
+    settings.highlight_bonuses_checkbox.toggled.connect(lambda checked: prefs.setValue("highlight_bonuses", checked))
 
     # --- WR (world record) comparison ---
     wr_sections = load_wr_sections()
@@ -70,6 +88,9 @@ def run() -> int:
 
     detector.section_changed.connect(apply_wr_section)
     settings.compare_to_wr_checkbox.toggled.connect(on_compare_to_wr_toggled)
+
+    # --- bonus highlighting ---
+    wire_bonus_highlight(settings, window.sprite_strip, BONUSES)
 
     # --- WIRING (VERY IMPORTANT) ---
 

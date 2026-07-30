@@ -31,6 +31,19 @@ EVOLVE_NAMES = {
     "141", "148",
 }
 
+# Dex numbers that count as a "bonus" catch. Purely cosmetic: with the
+# "Highlight bonuses" setting on, catching one of these lights it up red
+# instead of the usual black. Detection and routing ignore this entirely,
+# so a number listed here doesn't have to appear in CATCH_SECTIONS_RAW.
+#
+# In dex order: Raticate, Raichu, Sandslash, Wigglytuff, Golbat, Parasect,
+# Venomoth, Golduck, Kadabra, Machoke, Graveler, Dodrio, Dewgong, Muk,
+# Hypno, Kingler, Electrode, Marowak, Rhydon.
+BONUSES: set[str] = {
+    "20", "26", "28", "40", "42", "47", "49", "55", "64", "67",
+    "75", "85", "87", "89", "97", "99", "101", "105", "112",
+}
+
 # Hand-authored catch route: this specific playthrough's actual order,
 # which does NOT follow ascending dex-number order (some Pokemon are only
 # reachable well out of dex order, or via a detour). Detection only looks

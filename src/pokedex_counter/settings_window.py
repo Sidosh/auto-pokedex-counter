@@ -34,6 +34,9 @@ class SettingsWindow(QWidget):
         self.compare_to_wr_checkbox = QCheckBox()
         form.addRow("Compare to WR?", self.compare_to_wr_checkbox)
 
+        self.highlight_bonuses_checkbox = QCheckBox()
+        form.addRow("Highlight bonuses", self.highlight_bonuses_checkbox)
+
         layout.addLayout(form)
 
         self.reset_button = QPushButton("Reset counter")

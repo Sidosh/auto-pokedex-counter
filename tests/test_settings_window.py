@@ -1,0 +1,38 @@
+"""SettingsWindow is a dumb view (all wiring lives in app.py), so what's
+worth locking in is that each control exists, is labeled the way app.py's
+QSettings keys and the user expect, and starts in the right state."""
+
+import pytest
+from PySide6.QtWidgets import QFormLayout
+
+from pokedex_counter.settings_window import SettingsWindow
+
+
+@pytest.fixture
+def settings(qtbot):
+    window = SettingsWindow()
+    qtbot.addWidget(window)
+    return window
+
+
+def label_for(settings: SettingsWindow, widget) -> str:
+    form = settings.findChild(QFormLayout)
+    return form.labelForField(widget).text()
+
+
+def test_highlight_bonuses_checkbox_is_labeled_and_starts_off(settings):
+    assert label_for(settings, settings.highlight_bonuses_checkbox) == "Highlight bonuses"
+    assert not settings.highlight_bonuses_checkbox.isChecked()
+
+
+def test_compare_to_wr_checkbox_is_labeled_and_starts_off(settings):
+    assert label_for(settings, settings.compare_to_wr_checkbox) == "Compare to WR?"
+    assert not settings.compare_to_wr_checkbox.isChecked()
+
+
+def test_the_two_highlight_settings_are_independent(settings):
+    """Both paint the same sprite backgrounds but are separate toggles -
+    neither checkbox may drag the other along."""
+    settings.highlight_bonuses_checkbox.setChecked(True)
+
+    assert not settings.compare_to_wr_checkbox.isChecked()

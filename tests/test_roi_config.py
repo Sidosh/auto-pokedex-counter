@@ -19,6 +19,7 @@ from pathlib import Path
 import pokedex_counter.roi_config as roi_config
 from pokedex_counter.config import SPRITES_BG_DIR
 from pokedex_counter.roi_config import (
+    BONUSES,
     CATCH_SECTIONS,
     SECTION_TRIGGERS,
     build_detection_entries,
@@ -100,6 +101,15 @@ def test_section_triggers_are_members_of_their_own_section():
             continue
         names_in_section = {name for name, _roi_label in CATCH_SECTIONS[section_index]}
         assert trigger in names_in_section
+
+
+def test_bonuses_are_dex_numbers():
+    """BONUSES is hand-edited and only ever used for a lookup by sprite
+    name, so a typo'd or non-dex entry would silently never highlight
+    rather than fail loudly."""
+    assert all(name.isdigit() and 1 <= int(name) <= 151 for name in BONUSES), (
+        f"not dex numbers: {sorted(name for name in BONUSES if not name.isdigit() or not 1 <= int(name) <= 151)}"
+    )
 
 
 def test_every_entry_resolves_to_a_real_sprite_template():

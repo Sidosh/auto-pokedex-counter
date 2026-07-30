@@ -30,6 +30,7 @@ class SpriteStrip(QWidget):
         self._labels_by_name: dict[str, ClickableLabel] = {}
         self._wr_enabled = False
         self._wr_names: set[str] = set()
+        self._bonus_names: set[str] = set()
 
         self._layout = FlowLayout(self)
 
@@ -97,16 +98,22 @@ class SpriteStrip(QWidget):
 
         return label
 
+    def _catch_color_for(self, name: str) -> str:
+        """The background a catch of `name` should get. Bonus highlighting
+        outranks the WR colors - a bonus is worth seeing whether or not it
+        happens to also sit on the WR route."""
+        if name in self._bonus_names:
+            return "red"
+        if self._wr_enabled and name not in self._wr_names:
+            return "green"
+        return "black"
+
     def select_sprite(self, name: str) -> bool:
         label = self._labels_by_name.get(name)
         if label is None:
             return False
 
-        if self._wr_enabled:
-            color = "black" if name in self._wr_names else "green"
-        else:
-            color = "black"
-        label.select(color)
+        label.select(self._catch_color_for(name))
         return True
 
     def deselect_sprite(self, name: str) -> bool:
@@ -136,7 +143,7 @@ class SpriteStrip(QWidget):
                 continue
             label.set_wr_marked(True)
             if label._selected:
-                label.set_catch_color("black")
+                label.set_catch_color(self._catch_color_for(name))
 
     def clear_wr_marks(self) -> None:
         """Turn off WR comparison: no more blue highlighting, and catches go
@@ -145,6 +152,14 @@ class SpriteStrip(QWidget):
         self._wr_names = set()
         for label in self._labels_by_name.values():
             label.set_wr_marked(False)
+
+    def set_bonus_names(self, names: set[str]) -> None:
+        """Turn bonus highlighting on for `names`; an empty set turns it off
+        again. Recolors what's already caught so flipping the setting
+        mid-run applies retroactively instead of only to future catches."""
+        self._bonus_names = set(names)
+        for name, label in self._labels_by_name.items():
+            label.set_catch_color(self._catch_color_for(name))
 
     def reset(self) -> None:
         """Deselect every sprite, going through the same per-sprite deselect
@@ -179,6 +194,10 @@ class SpriteStrip(QWidget):
         if isinstance(label, ClickableLabel):
             if label._selected:
                 self._count += 1
+                # A hand-clicked catch comes back black - the label itself
+                # knows nothing about WR/bonus state - so fix its color up
+                # here, giving manual marks the same colors detected ones get.
+                label.set_catch_color(self._catch_color_for(path.stem))
             else:
                 self._count -= 1
                 self.sprite_deselected.emit(path.stem)   # NEW

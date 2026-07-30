@@ -1,3 +1,20 @@
+"""Covers reset plus the sprite coloring rules, which are the strip's most
+easily-broken behavior because three independent features paint the same
+label background (see SpriteStrip._catch_color_for):
+
+    blue   - on the WR route for a section already reached, not caught yet
+    black  - caught, and nothing special about it
+    green  - caught, but never on the WR route (only while comparing to WR)
+    red    - caught, and listed in roi_config.BONUSES (only while
+             "Highlight bonuses" is on)
+
+Tests assert on the rendered stylesheet rather than the private
+_catch_color, since a label that isn't selected keeps a catch color it
+isn't currently showing.
+"""
+
+import re
+
 import pytest
 
 from pokedex_counter.config import SPRITES_DIR
@@ -9,6 +26,13 @@ def sprite_strip(qtbot):
     strip = SpriteStrip(SPRITES_DIR)
     qtbot.addWidget(strip)
     return strip
+
+
+def color_of(strip: SpriteStrip, name: str) -> str | None:
+    """The background color `name`'s label is actually rendering, or None
+    when it's showing no highlight at all."""
+    match = re.search(r"background-color:\s*(\w+);", strip._labels_by_name[name].styleSheet())
+    return match.group(1) if match else None
 
 
 def test_reset_deselects_everything_and_zeroes_the_count(sprite_strip):
@@ -32,4 +56,143 @@ def test_reset_deselects_everything_and_zeroes_the_count(sprite_strip):
 
 def test_reset_on_already_empty_strip_is_a_noop(sprite_strip):
     sprite_strip.reset()
+    assert sprite_strip._count == 0
+
+
+# --- WR comparison colors ---
+
+def test_catch_is_black_when_no_feature_is_on(sprite_strip):
+    sprite_strip.select_sprite("1")
+    assert color_of(sprite_strip, "1") == "black"
+
+
+def test_wr_route_sprite_is_blue_until_it_is_caught(sprite_strip):
+    sprite_strip.mark_wr_section({"1"})
+    assert color_of(sprite_strip, "1") == "blue"
+
+    sprite_strip.select_sprite("1")
+    assert color_of(sprite_strip, "1") == "black"
+
+
+def test_off_route_catch_is_green_while_comparing_to_wr(sprite_strip):
+    sprite_strip.mark_wr_section({"1"})
+
+    sprite_strip.select_sprite("4")
+
+    assert color_of(sprite_strip, "4") == "green"
+
+
+# --- bonus highlighting ---
+
+def test_bonus_catch_is_red(sprite_strip):
+    sprite_strip.set_bonus_names({"4"})
+
+    sprite_strip.select_sprite("4")
+
+    assert color_of(sprite_strip, "4") == "red"
+
+
+def test_bonus_is_not_highlighted_before_it_is_caught(sprite_strip):
+    """Unlike a WR mark, a bonus is only a catch color - listing one must
+    not pre-highlight it as something still to get."""
+    sprite_strip.set_bonus_names({"4"})
+
+    assert color_of(sprite_strip, "4") is None
+
+
+def test_bonus_outranks_both_wr_catch_colors(sprite_strip):
+    sprite_strip.set_bonus_names({"1", "4"})
+    sprite_strip.mark_wr_section({"1"})  # 1 on route, 4 off it
+
+    sprite_strip.select_sprite("1")
+    sprite_strip.select_sprite("4")
+
+    assert color_of(sprite_strip, "1") == "red"
+    assert color_of(sprite_strip, "4") == "red"
+
+
+def test_enabling_bonuses_recolors_catches_already_made(sprite_strip):
+    sprite_strip.select_sprite("4")
+    assert color_of(sprite_strip, "4") == "black"
+
+    sprite_strip.set_bonus_names({"4"})
+
+    assert color_of(sprite_strip, "4") == "red"
+
+
+def test_disabling_bonuses_puts_catches_back_to_their_wr_color(sprite_strip):
+    sprite_strip.mark_wr_section({"1"})
+    sprite_strip.set_bonus_names({"1", "4"})
+    sprite_strip.select_sprite("1")
+    sprite_strip.select_sprite("4")
+
+    sprite_strip.set_bonus_names(set())
+
+    assert color_of(sprite_strip, "1") == "black"  # on route
+    assert color_of(sprite_strip, "4") == "green"  # off route
+
+
+def test_reaching_a_bonus_wr_section_does_not_clobber_its_red(sprite_strip):
+    """mark_wr_section retroactively corrects a catch made before its
+    section came up. That correction has to respect bonus highlighting
+    instead of forcing the on-route black."""
+    sprite_strip.set_bonus_names({"4"})
+    sprite_strip.mark_wr_section({"1"})
+    sprite_strip.select_sprite("4")  # caught early, off route so far
+
+    sprite_strip.mark_wr_section({"4"})  # its section arrives: on route after all
+
+    assert color_of(sprite_strip, "4") == "red"
+
+
+def test_bonus_names_missing_from_the_strip_are_ignored(sprite_strip):
+    """BONUSES is hand-edited and doesn't have to line up with the sprite
+    folder, so an unknown entry must not blow up."""
+    sprite_strip.set_bonus_names({"4", "not-a-sprite"})
+
+    sprite_strip.select_sprite("4")
+
+    assert color_of(sprite_strip, "4") == "red"
+
+
+def test_bonus_highlighting_survives_a_reset(sprite_strip):
+    """reset() clears WR marks so a fresh run re-earns them section by
+    section, but BONUSES is static - it stays on for the next run."""
+    sprite_strip.set_bonus_names({"4"})
+    sprite_strip.select_sprite("4")
+
+    sprite_strip.reset()
+    assert color_of(sprite_strip, "4") is None
+
+    sprite_strip.select_sprite("4")
+    assert color_of(sprite_strip, "4") == "red"
+
+
+# --- hand-clicked catches ---
+
+def test_manual_click_gets_the_same_colors_a_detected_catch_gets(sprite_strip):
+    """A ClickableLabel can only paint itself black on click - it knows
+    nothing about WR or bonus state - so the strip fixes the color up
+    afterwards. Without that, hand-marking a catch the detector missed
+    would mis-color it."""
+    sprite_strip.set_bonus_names({"4"})
+    sprite_strip.mark_wr_section({"1"})
+
+    for name in ("1", "4", "7"):
+        sprite_strip._labels_by_name[name].toggle_selected()
+
+    assert color_of(sprite_strip, "4") == "red"    # bonus
+    assert color_of(sprite_strip, "1") == "black"  # on route
+    assert color_of(sprite_strip, "7") == "green"  # off route
+    assert sprite_strip._count == 3
+
+
+def test_manual_unclick_clears_the_highlight_and_the_count(sprite_strip):
+    sprite_strip.set_bonus_names({"4"})
+    label = sprite_strip._labels_by_name["4"]
+
+    label.toggle_selected()
+    label.toggle_selected()
+
+    assert color_of(sprite_strip, "4") is None
     assert sprite_strip._count == 0
