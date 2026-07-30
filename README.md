@@ -18,7 +18,49 @@ Every time the app starts, it calibrates itself before the counter window opens:
 4. Colored boxes on the preview show live match confidence for the three regions it's searching for. Once all three are found confidently and held steady for a moment, the preview closes automatically and the counter window opens.
 5. Press `Esc` at any point to skip calibration — the app falls back to whatever positions worked last time instead.
 
-A successful calibration is remembered for next launch (saved as a `roi_config.py` file next to the `.exe`), so you typically only need to re-do it if your camera framing changes.
+A successful calibration is remembered for next launch (saved as a `roi_calibration.py` file next to the `.exe`), so you typically only need to re-do it if your camera framing changes. You can also re-run it at any time with the **Calibrate** button, without restarting the app.
+
+## Using the app
+
+Two windows open side by side: the **counter window**, which is the one to capture in OBS, and a **settings window** holding every control — so nothing but the sprite grid and the count ever ends up on stream.
+
+### The counter window
+
+All 151 sprites plus a running "N caught". Catching a Pokémon highlights its sprite and bumps the count.
+
+**Clicking a sprite marks or unmarks it by hand**, for when the detector misses a catch or flags one it shouldn't. Unmarking also lets that Pokémon be detected again later.
+
+Until at least one region has been calibrated, the count is replaced by a prompt to calibrate — detection can't run at all in that state, so showing "0 caught" would look like it was working.
+
+### The settings window
+
+| Control | What it does |
+| --- | --- |
+| Sprites per row | Grid width; the counter window resizes itself to fit |
+| Counter font size | Size of the "N caught" text |
+| Compare to WR? | Color-codes the grid against the bundled world-record route |
+| Highlight bonuses | Colors bonus catches red (see below) |
+| Reset counter | Clears the run and starts fresh |
+| Calibrate | Re-runs calibration mid-session |
+
+The four settings above the buttons are remembered between launches.
+
+### Sprite colors
+
+With both comparison settings off, every catch is plain **black**. Turning them on adds:
+
+- **Blue** — on the WR route for a section you've already reached, but not caught yet. In other words, the WR run would have it by now and you don't. These accumulate as the run progresses, so one missed in its own section stays flagged.
+- **Black** — caught, and on the WR route.
+- **Green** — caught, but not on the WR route in any section reached so far.
+- **Red** — caught and listed as a bonus. This wins over black and green, so a bonus stands out whether or not it's on the route.
+
+Resetting the counter clears the accumulated blue marks so the next run re-earns them section by section. Bonus highlighting is a fixed list, so it just stays on.
+
+The WR route is bundled as `resources/comparison/WR.json`; if it's missing or unreadable, "Compare to WR?" simply has nothing to mark. Which Pokémon count as bonuses is the `BONUSES` list in `roi_config.py`.
+
+### Personal best
+
+When a run reaches all 151, resetting the counter or closing the app asks whether to save it as your personal best. Saving writes `comparison/PB.json` — next to the `.exe` when running the packaged build — recording which Pokémon were caught in which section, in the same shape as the bundled `WR.json`.
 
 ## Setup (for development)
 
@@ -52,24 +94,34 @@ This produces `dist/PokedexCounter.exe` (bundled with `resources/`) using PyInst
 
 ```text
 src/pokedex_counter/
-  __main__.py               Entry point (`python -m pokedex_counter`)
-  app.py                     QApplication bootstrap and service wiring
-  calibration_runner.py      Runs calibration on startup, persists locked ROIs
-  roi_config.py               Per-Pokemon ROI mapping + ROI_CATCH/EVOLVE/TEXT
-  roi_writer.py               Rewrites roi_config.py's ROI_* constants on disk
+  __main__.py                 Entry point (`python -m pokedex_counter`)
+  app.py                      QApplication bootstrap and service wiring
+  calibration_runner.py       Runs calibration on startup, persists locked ROIs
+  camera.py                   Finds the OBS Virtual Camera's device index
+  roi_config.py               Catch route, bonus list, detection entry building
+  roi_calibration.py          ROI_CATCH/EVOLVE/TEXT for this machine (gitignored)
+  roi_writer.py               Rewrites roi_calibration.py's ROI_* constants on disk
   config.py                   App-wide constants, resource paths
-  main_window.py              Main window UI (sprite grid + counter)
+  main_window.py              Counter window UI (sprite grid + counter)
+  settings_window.py          Settings window UI (all controls live here)
   controllers/game_controller.py   Tracks which Pokemon have been found
   services/
     capture_service.py        Camera capture thread
     calibration_service.py    Live ROI calibration against the title screen
     detection_service.py      Per-frame catch/evolve/text detection
     template_service.py       Loads sprite template images
+    wr_service.py             Loads the world-record route from WR.json
+    pb_service.py             Saves a completed run to PB.json
   vision/template_matching.py Multi-scale template matching helper
-  ui/widgets/                 Sprite strip, flow layout, etc.
+  ui/widgets/
+    sprite_strip.py           The sprite grid, and all catch-coloring rules
+    clickable_label.py        One sprite: click to toggle, paints its highlight
+    flow_layout.py            Wrapping grid layout the strip is built on
   resources/
     sprites/, sprites_background/   Per-Pokemon template images
     calibration/                    Title-screen reference crops
+    comparison/WR.json              World-record route, by section
+    fonts/                          Pokemon display fonts for the counter
 tests/                        pytest + pytest-qt tests
 scripts/build.py              PyInstaller packaging script
 ```
