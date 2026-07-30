@@ -107,7 +107,7 @@ def run() -> int:
         # clear_wr_marks). Re-apply the fresh run's marks now. When the run
         # wasn't empty, deselecting the caught trigger pokemon rolls the
         # section back to 0 and section_changed would re-mark anyway - but an
-        # empty reset never fires that signal, so without this the red marks
+        # empty reset never fires that signal, so without this the blue marks
         # would silently disappear until the checkbox is toggled. (Internally
         # guarded by the checkbox, so a no-op when comparison is off.)
         apply_wr_up_to_current()

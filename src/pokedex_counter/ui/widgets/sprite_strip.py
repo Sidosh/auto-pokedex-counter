@@ -103,7 +103,7 @@ class SpriteStrip(QWidget):
             return False
 
         if self._wr_enabled:
-            color = "black" if name in self._wr_names else "blue"
+            color = "black" if name in self._wr_names else "green"
         else:
             color = "black"
         label.select(color)
@@ -118,14 +118,14 @@ class SpriteStrip(QWidget):
         return True
 
     def mark_wr_section(self, names: set[str]) -> None:
-        """Highlight `names` red, on top of whatever's already marked from
+        """Highlight `names` blue, on top of whatever's already marked from
         earlier sections - a WR pokemon missed in its own section stays
         flagged instead of silently losing its highlight once the run moves
         past it. Also remembers them so future catches are colored black
-        (on-route, whenever caught) or blue (never on-route).
+        (on-route, whenever caught) or green (never on-route).
 
         If one of `names` was already caught before its section came up
-        (so it was colored blue as apparently off-route at the time),
+        (so it was colored green as apparently off-route at the time),
         correct it to black now that this section confirms it's on-route
         after all."""
         self._wr_enabled = True
@@ -139,7 +139,7 @@ class SpriteStrip(QWidget):
                 label.set_catch_color("black")
 
     def clear_wr_marks(self) -> None:
-        """Turn off WR comparison: no more red highlighting, and catches go
+        """Turn off WR comparison: no more blue highlighting, and catches go
         back to the default black."""
         self._wr_enabled = False
         self._wr_names = set()
@@ -152,7 +152,7 @@ class SpriteStrip(QWidget):
         stay consistent. Also drops any accumulated WR marks - since those
         now persist across sections (see mark_wr_section), a fresh run
         needs to re-earn them section by section rather than starting with
-        every section the previous run ever reached still lit up red."""
+        every section the previous run ever reached still lit up blue."""
         for name in self._labels_by_name:
             self.deselect_sprite(name)
         if self._wr_enabled:
