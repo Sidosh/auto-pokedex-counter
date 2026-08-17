@@ -31,6 +31,11 @@ class SpriteStrip(QWidget):
         self._wr_enabled = False
         self._wr_names: set[str] = set()
         self._bonus_names: set[str] = set()
+        # Caught sprites that got here by evolving rather than by being
+        # caught. Remembered per sprite (not just consulted once at catch
+        # time) so the retroactive recolor in set_bonus_names can tell the
+        # two apart long after the fact.
+        self._evolved_names: set[str] = set()
 
         self._layout = FlowLayout(self)
 
@@ -101,17 +106,31 @@ class SpriteStrip(QWidget):
     def _catch_color_for(self, name: str) -> str:
         """The background a catch of `name` should get. Bonus highlighting
         outranks the WR colors - a bonus is worth seeing whether or not it
-        happens to also sit on the WR route."""
-        if name in self._bonus_names:
+        happens to also sit on the WR route - but only for a real catch:
+        evolving into a bonus pokemon is the ordinary way to get it, so it
+        gets the normal colors."""
+        if name in self._bonus_names and name not in self._evolved_names:
             return "red"
         if self._wr_enabled and name not in self._wr_names:
             return "green"
         return "black"
 
-    def select_sprite(self, name: str) -> bool:
+    def select_sprite(self, name: str, evolved: bool = False) -> bool:
+        """Mark `name` as obtained. `evolved` says it was obtained by
+        evolution rather than by catching it, which suppresses the bonus
+        highlight. Defaults to False so a plain "it was caught" call - the
+        manual click path, and every test that predates bonuses - keeps
+        working unchanged."""
         label = self._labels_by_name.get(name)
         if label is None:
             return False
+
+        # Before select(), which round-trips through _on_sprite_clicked and
+        # recomputes the color from _catch_color_for.
+        if evolved:
+            self._evolved_names.add(name)
+        else:
+            self._evolved_names.discard(name)
 
         label.select(self._catch_color_for(name))
         return True
@@ -156,7 +175,8 @@ class SpriteStrip(QWidget):
     def set_bonus_names(self, names: set[str]) -> None:
         """Turn bonus highlighting on for `names`; an empty set turns it off
         again. Recolors what's already caught so flipping the setting
-        mid-run applies retroactively instead of only to future catches."""
+        mid-run applies retroactively instead of only to future catches -
+        anything obtained by evolving stays unhighlighted."""
         self._bonus_names = set(names)
         for name, label in self._labels_by_name.items():
             label.set_catch_color(self._catch_color_for(name))
@@ -200,6 +220,10 @@ class SpriteStrip(QWidget):
                 label.set_catch_color(self._catch_color_for(path.stem))
             else:
                 self._count -= 1
+                # Covers the programmatic path too - deselect_sprite() lands
+                # here via the label's `clicked` - so forgetting a sprite
+                # forgets how it was obtained, and re-marking it starts over.
+                self._evolved_names.discard(path.stem)
                 self.sprite_deselected.emit(path.stem)   # NEW
 
             self.count_changed.emit(self._count)

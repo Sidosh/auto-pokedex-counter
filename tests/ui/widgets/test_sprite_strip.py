@@ -5,8 +5,8 @@ label background (see SpriteStrip._catch_color_for):
     blue   - on the WR route for a section already reached, not caught yet
     black  - caught, and nothing special about it
     green  - caught, but never on the WR route (only while comparing to WR)
-    red    - caught, and listed in roi_config.BONUSES (only while
-             "Highlight bonuses" is on)
+    red    - caught (not evolved into), and listed in roi_config.BONUSES
+             (only while "Highlight bonuses" is on)
 
 Tests assert on the rendered stylesheet rather than the private
 _catch_color, since a label that isn't selected keeps a catch color it
@@ -165,6 +165,59 @@ def test_bonus_highlighting_survives_a_reset(sprite_strip):
     assert color_of(sprite_strip, "4") is None
 
     sprite_strip.select_sprite("4")
+    assert color_of(sprite_strip, "4") == "red"
+
+
+# --- evolutions are not bonuses ---
+
+def test_evolving_into_a_bonus_is_not_highlighted(sprite_strip):
+    """Every bonus is an evolved form, so obtaining one says nothing on its
+    own - only catching it in the wild is the bonus."""
+    sprite_strip.set_bonus_names({"4"})
+
+    sprite_strip.select_sprite("4", evolved=True)
+
+    assert color_of(sprite_strip, "4") == "black"
+
+
+def test_an_evolved_bonus_stays_black_when_highlighting_is_turned_on_later(sprite_strip):
+    """set_bonus_names recolors past catches, so it has to remember which of
+    them were evolutions rather than re-deciding from the name alone."""
+    sprite_strip.select_sprite("4", evolved=True)
+
+    sprite_strip.set_bonus_names({"4"})
+
+    assert color_of(sprite_strip, "4") == "black"
+
+
+def test_an_evolved_bonus_still_gets_its_wr_color(sprite_strip):
+    """Suppressing the red must fall through to the normal catch colors, not
+    force black."""
+    sprite_strip.set_bonus_names({"4"})
+    sprite_strip.mark_wr_section({"1"})  # 4 is off route
+
+    sprite_strip.select_sprite("4", evolved=True)
+
+    assert color_of(sprite_strip, "4") == "green"
+
+
+def test_forgetting_an_evolved_sprite_lets_it_be_a_bonus_again(sprite_strip):
+    sprite_strip.set_bonus_names({"4"})
+    sprite_strip.select_sprite("4", evolved=True)
+
+    sprite_strip.deselect_sprite("4")
+    sprite_strip.select_sprite("4")
+
+    assert color_of(sprite_strip, "4") == "red"
+
+
+def test_reset_forgets_that_a_bonus_was_evolved(sprite_strip):
+    sprite_strip.set_bonus_names({"4"})
+    sprite_strip.select_sprite("4", evolved=True)
+
+    sprite_strip.reset()
+    sprite_strip.select_sprite("4")
+
     assert color_of(sprite_strip, "4") == "red"
 
 

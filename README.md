@@ -52,7 +52,7 @@ With both comparison settings off, every catch is plain **black**. Turning them 
 - **Blue** — on the WR route for a section you've already reached, but not caught yet. In other words, the WR run would have it by now and you don't. These accumulate as the run progresses, so one missed in its own section stays flagged.
 - **Black** — caught, and on the WR route.
 - **Green** — caught, but not on the WR route in any section reached so far.
-- **Red** — caught and listed as a bonus. This wins over black and green, so a bonus stands out whether or not it's on the route.
+- **Red** — caught in the wild and listed as a bonus. This wins over black and green, so a bonus stands out whether or not it's on the route. Every bonus is an evolved form, so *evolving* into one is the ordinary path and doesn't count — only the wild catch turns it red.
 
 Resetting the counter clears the accumulated blue marks so the next run re-earns them section by section. Bonus highlighting is a fixed list, so it just stays on.
 

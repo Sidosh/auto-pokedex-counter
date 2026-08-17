@@ -2,7 +2,11 @@
 from PySide6.QtCore import QObject, Signal
 
 class GameController(QObject):
-    pokemon_found = Signal(str)
+    # (dex number, section it was found in). The section rides along because
+    # the same dex number can be routed differently per section - notably as
+    # a catch in one and an evolution in another - and the UI needs to know
+    # which happened to color it (see roi_config.is_evolution).
+    pokemon_found = Signal(str, int)
     count_changed = Signal(int)
 
     def __init__(self):
@@ -29,7 +33,7 @@ class GameController(QObject):
         self.count += 1
         self.section_catches.setdefault(self._current_section, []).append(name)
 
-        self.pokemon_found.emit(name)
+        self.pokemon_found.emit(name, self._current_section)
         self.count_changed.emit(self.count)
 
     def forget(self, name: str) -> None:

@@ -3,12 +3,18 @@ that's been hoisted out of it is exercised here - for the bonus highlight
 that's the whole app-side contract: the checkbox drives the sprite strip,
 and the state it was restored in is applied at startup rather than only on
 the first toggle.
+
+wire_found_pokemon carries the other half of it: the strip knows nothing
+about sections, so app.py is where a find gets classified as a catch or an
+evolution.
 """
 
 import pytest
 
-from pokedex_counter.app import wire_bonus_highlight
+from pokedex_counter.app import wire_bonus_highlight, wire_found_pokemon
 from pokedex_counter.config import SPRITES_DIR
+from pokedex_counter.controllers.game_controller import GameController
+from pokedex_counter.roi_config import CATCH_SECTIONS
 from pokedex_counter.settings_window import SettingsWindow
 from pokedex_counter.ui.widgets.sprite_strip import SpriteStrip
 
@@ -61,3 +67,51 @@ def test_starts_off_when_the_setting_is_off(wired):
     wire_bonus_highlight(settings, strip, BONUSES)
 
     assert strip._bonus_names == set()
+
+
+# --- found pokemon ---
+
+# Raticate: catchable in the wild on this route, and also swept up as an
+# evolution at the end of the run - so it exercises both classifications.
+BOTH_WAYS = "20"
+
+
+@pytest.fixture
+def found_wiring(qtbot):
+    controller = GameController()
+    strip = SpriteStrip(SPRITES_DIR)
+    qtbot.addWidget(strip)
+    wire_found_pokemon(controller, strip)
+    return controller, strip
+
+
+def _sections_for(name: str) -> tuple[int, int]:
+    """(a section where `name` is caught, one where it's evolved into), read
+    out of the real route so these stay honest if it gets re-authored."""
+    caught = next(i for i, s in enumerate(CATCH_SECTIONS) if (name, "CATCH") in s)
+    evolved = next(i for i, s in enumerate(CATCH_SECTIONS) if (name, "EVOLVE") in s)
+    return caught, evolved
+
+
+def test_a_wild_catch_reaches_the_strip_as_a_catch(found_wiring):
+    controller, strip = found_wiring
+    caught_in, _ = _sections_for(BOTH_WAYS)
+
+    controller.on_section_changed(caught_in)
+    controller.on_detection(BOTH_WAYS)
+
+    assert strip._labels_by_name[BOTH_WAYS]._selected
+    assert BOTH_WAYS not in strip._evolved_names
+
+
+def test_the_same_pokemon_reaches_the_strip_as_an_evolution_elsewhere(found_wiring):
+    """Same dex number, different section - only the section it was found in
+    says which of the two happened."""
+    controller, strip = found_wiring
+    _, evolved_in = _sections_for(BOTH_WAYS)
+
+    controller.on_section_changed(evolved_in)
+    controller.on_detection(BOTH_WAYS)
+
+    assert strip._labels_by_name[BOTH_WAYS]._selected
+    assert BOTH_WAYS in strip._evolved_names

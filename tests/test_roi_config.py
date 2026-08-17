@@ -23,6 +23,7 @@ from pokedex_counter.roi_config import (
     CATCH_SECTIONS,
     SECTION_TRIGGERS,
     build_detection_entries,
+    is_evolution,
 )
 from pokedex_counter.services.template_service import TemplateService
 
@@ -110,6 +111,38 @@ def test_bonuses_are_dex_numbers():
     assert all(name.isdigit() and 1 <= int(name) <= 151 for name in BONUSES), (
         f"not dex numbers: {sorted(name for name in BONUSES if not name.isdigit() or not 1 <= int(name) <= 151)}"
     )
+
+
+def test_a_section_evolve_override_counts_as_an_evolution():
+    for section_index, names in roi_config.SECTION_EVOLVE_OVERRIDES.items():
+        for name in names:
+            caught_here_too = any(
+                entry_name == name and roi_label != "EVOLVE"
+                for entry_name, roi_label in CATCH_SECTIONS[section_index]
+            )
+            assert is_evolution(section_index, name) is not caught_here_too
+
+
+def test_the_final_sweep_section_counts_as_evolutions():
+    """build_catch_sections() rakes every unrouted evolution onto the end of
+    the last section. That sweep is where most of the run's evolutions
+    happen, so it's the case the bonus highlight most needs to exclude."""
+    assert is_evolution(len(CATCH_SECTIONS) - 1, "20")  # Raticate, swept
+    assert not is_evolution(5, "20")  # ...but a real catch back in section 6
+
+
+def test_a_catch_is_never_an_evolution():
+    for section_index, section in enumerate(CATCH_SECTIONS):
+        for name, roi_label in section:
+            if roi_label == "CATCH":
+                assert not is_evolution(section_index, name)
+
+
+def test_an_out_of_range_section_is_not_an_evolution():
+    """Nothing should ever ask, but a section index that fell out of sync
+    must degrade to "it was caught" rather than raise mid-run."""
+    assert not is_evolution(-1, "20")
+    assert not is_evolution(len(CATCH_SECTIONS), "20")
 
 
 def test_every_entry_resolves_to_a_real_sprite_template():

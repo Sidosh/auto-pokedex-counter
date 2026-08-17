@@ -36,6 +36,11 @@ EVOLVE_NAMES = {
 # instead of the usual black. Detection and routing ignore this entirely,
 # so a number listed here doesn't have to appear in CATCH_SECTIONS_RAW.
 #
+# Every one of these is an evolved form, so "obtained" alone doesn't make it
+# a bonus - only actually catching it in the wild does, since evolving into
+# it is the routine path the highlight exists to stand out from. See
+# is_evolution() for how the two are told apart.
+#
 # In dex order: Raticate, Raichu, Sandslash, Wigglytuff, Golbat, Parasect,
 # Venomoth, Golduck, Kadabra, Machoke, Graveler, Dodrio, Dewgong, Muk,
 # Hypno, Kingler, Electrode, Marowak, Rhydon.
@@ -110,6 +115,32 @@ def build_catch_sections() -> list[list[tuple[str, str]]]:
 
 
 CATCH_SECTIONS: list[list[tuple[str, str]]] = build_catch_sections()
+
+
+def build_evolution_entries() -> list[set[str]]:
+    """Per section, the dex numbers that can ONLY be obtained there by
+    evolving - i.e. their entry is EVOLVE and the section offers no CATCH or
+    TEXT entry for them as well. A name with both kinds of entry in one
+    section is left out: it could genuinely have been caught there, and the
+    detector can't say which of the two ROIs won, so it keeps the benefit of
+    the doubt."""
+    entries = []
+    for section in CATCH_SECTIONS:
+        evolved = {name for name, roi_label in section if roi_label == "EVOLVE"}
+        obtained_otherwise = {name for name, roi_label in section if roi_label != "EVOLVE"}
+        entries.append(evolved - obtained_otherwise)
+    return entries
+
+
+EVOLUTION_ENTRIES: list[set[str]] = build_evolution_entries()
+
+
+def is_evolution(section_index: int, name: str) -> bool:
+    """Whether obtaining `name` while section `section_index` is active means
+    it evolved rather than that it was caught."""
+    if not 0 <= section_index < len(EVOLUTION_ENTRIES):
+        return False
+    return name in EVOLUTION_ENTRIES[section_index]
 
 
 def build_detection_entries(templates: dict, locked: dict[str, tuple[int, int, int, int]] | None = None):

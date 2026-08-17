@@ -31,6 +31,19 @@ def wire_bonus_highlight(settings: SettingsWindow, sprite_strip, bonuses: set[st
     apply(settings.highlight_bonuses_checkbox.isChecked())
 
 
+def wire_found_pokemon(controller: GameController, sprite_strip) -> None:
+    """Route found pokemon to the sprite strip, translating the section they
+    were found in into the one thing the strip cares about: whether this was
+    a catch or an evolution. Routing knowledge stays here rather than in the
+    widget, which knows nothing about sections."""
+    from pokedex_counter.roi_config import is_evolution
+
+    def on_pokemon_found(name: str, section_index: int) -> None:
+        sprite_strip.select_sprite(name, evolved=is_evolution(section_index, name))
+
+    controller.pokemon_found.connect(on_pokemon_found)
+
+
 def run() -> int:
     camera_index = resolve_camera_index()
 
@@ -98,7 +111,7 @@ def run() -> int:
     detector.detection.connect(controller.on_detection)
     detector.section_changed.connect(controller.on_section_changed)
 
-    controller.pokemon_found.connect(window.sprite_strip.select_sprite)
+    wire_found_pokemon(controller, window.sprite_strip)
     window.sprite_strip.sprite_deselected.connect(controller.forget)
     window.sprite_strip.sprite_deselected.connect(detector.forget)
     window.sprite_strip.count_changed.connect(window._update_counter)
